@@ -143,7 +143,7 @@ export const highlightsData = [
     stat: "3",
     label: "Sponsor Wins",
     title: "Sponsor Sweep",
-    description: "Three major sponsors closed in a single outreach cycle with our media kit and high-converting pitch films.",
+    description: "Four major sponsors closed in a single outreach cycle with our media kit and high-converting pitch films.",
     badge: "Brand Partnerships",
   },
   {
