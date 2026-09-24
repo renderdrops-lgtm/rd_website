@@ -52,7 +52,7 @@ export default function WorkSection() {
   return (
     <section id="work" className="py-28 px-4 sm:px-6 lg:px-8 bg-rd-black relative" style={{overflowX:'clip'}}>
       {/* Subtle top ambient glow */}
-      <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-rd-red/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 right-0 w-full max-w-[500px] h-[300px] bg-rd-red/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
@@ -62,7 +62,7 @@ export default function WorkSection() {
               <span className="w-8 h-[1.5px] bg-rd-red inline-block" />
               01 / SELECTED WORK
             </div>
-            <h2 className="font-display text-4xl sm:text-6xl md:text-7xl uppercase tracking-tight text-white leading-none">
+            <h2 className="font-display text-3xl sm:text-5xl md:text-7xl uppercase tracking-tight text-white leading-none">
               WORK THAT REFUSES{' '}
               <br className="hidden sm:inline" />
               <span className="text-outline hover:text-rd-red/10 transition-all duration-500">TO BLEND IN</span>
@@ -70,7 +70,7 @@ export default function WorkSection() {
           </div>
 
           {/* Filter Pills */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {filterCategories.map((filter) => (
               <button
                 key={filter.key}

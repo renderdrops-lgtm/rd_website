@@ -82,11 +82,11 @@ export default function AdminDashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-6 relative overflow-hidden select-none">
+      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4 sm:px-6 relative overflow-hidden select-none">
         <CustomCursor />
-        <div className="absolute w-[500px] h-[300px] bg-red-600/10 blur-[140px] pointer-events-none rounded-full" />
+        <div className="absolute w-full max-w-[500px] h-[300px] bg-red-600/10 blur-[140px] pointer-events-none rounded-full" />
 
-        <div className="max-w-md w-full bg-zinc-900/90 border border-zinc-800 p-8 rounded-2xl shadow-2xl relative z-10">
+        <div className="max-w-md w-full bg-zinc-900/90 border border-zinc-800 p-6 sm:p-8 rounded-2xl shadow-2xl relative z-10">
           <div className="text-center mb-6">
             <div className="w-12 h-12 bg-red-600/15 border border-red-600/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <Lock className="w-6 h-6 text-red-500" />
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
             <span className="text-[10px] font-mono text-red-500 uppercase tracking-[0.3em] block mb-1">
               // RESTRICTED ACCESS
             </span>
-            <h1 className="text-2xl font-black uppercase tracking-tight">Admin Terminal</h1>
+            <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight">Admin Terminal</h1>
             <p className="text-xs text-zinc-400 mt-1">RenderDrops Talent Acquisition Portal</p>
           </div>
 
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
                 placeholder="Enter Admin Passcode"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3.5 text-white focus:border-red-500 focus:outline-none text-sm transition-colors"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3.5 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm transition-colors"
                 required
                 autoFocus
               />
@@ -136,13 +136,13 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white p-6 md:p-12 relative">
+    <div className="min-h-screen bg-zinc-950 text-white p-4 sm:p-6 md:p-12 relative overflow-x-clip">
       <CustomCursor />
 
       <div className="max-w-7xl mx-auto relative z-10">
         
         {/* Top Header Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 pb-6 border-b border-zinc-800 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 sm:mb-10 pb-6 border-b border-zinc-800 gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -150,7 +150,7 @@ export default function AdminDashboard() {
                 // SECURE TERMINAL ACTIVE
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight flex flex-wrap items-center gap-2 sm:gap-3">
               <span>Recruitment Submissions</span>
               <span className="text-red-500">({applications.length})</span>
             </h1>
@@ -215,7 +215,7 @@ export default function AdminDashboard() {
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {filteredApps.map((app, index) => (
-              <div key={index} className="bg-zinc-900/50 border border-zinc-800 p-6 md:p-8 rounded-2xl space-y-6 hover:border-zinc-700 transition-all">
+              <div key={index} className="bg-zinc-900/50 border border-zinc-800 p-4 sm:p-6 md:p-8 rounded-2xl space-y-6 hover:border-zinc-700 transition-all">
                 
                 {/* Header row */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-zinc-800 pb-4">

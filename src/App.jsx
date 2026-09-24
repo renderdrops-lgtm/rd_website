@@ -43,7 +43,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-rd-black text-white relative">
+    <div className="min-h-screen bg-rd-black text-white relative overflow-x-clip">
       {/* Premium Custom Cursor */}
       <CustomCursor />
 

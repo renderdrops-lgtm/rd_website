@@ -87,51 +87,51 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4 md:p-6 overflow-y-auto">
       
       {/* Modal Container */}
-      <div className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 text-white rounded-2xl shadow-2xl my-8 p-8 md:p-12 overflow-hidden">
+      <div className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 text-white rounded-2xl shadow-2xl my-4 sm:my-8 p-5 sm:p-8 md:p-12 overflow-hidden">
         
         {/* Close Button */}
         <button
           onClick={handleCloseAll}
-          className="absolute top-6 right-6 p-2 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-full transition-colors z-20"
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-full transition-colors z-20"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Background Glow Accent */}
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-red-600/15 blur-[120px] pointer-events-none rounded-full" />
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-[400px] h-[200px] bg-red-600/15 blur-[120px] pointer-events-none rounded-full" />
 
         <div className="relative z-10">
           
           {!showForm && !submitted ? (
             /* STEP 1: TEASER / WELCOME POPUP (On Page Load) */
-            <div className="text-center py-6 space-y-8">
+            <div className="text-center py-4 sm:py-6 space-y-6 sm:space-y-8">
               <span className="text-xs uppercase tracking-[0.3em] font-mono text-red-500 inline-block bg-red-600/10 px-4 py-1.5 rounded-full border border-red-600/20">
                 // JOIN THE COLLECTIVE
               </span>
               
-              <div className="space-y-4">
-                <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase">
+              <div className="space-y-3 sm:space-y-4">
+                <h2 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tighter uppercase leading-none">
                   WE'RE ON THE LOOKOUT
                 </h2>
-                <p className="text-zinc-300 text-base md:text-lg max-w-lg mx-auto leading-relaxed">
+                <p className="text-zinc-300 text-sm sm:text-base md:text-lg max-w-lg mx-auto leading-relaxed">
                   Talent Acquisition for Design, VFX, Strategy, PR, Content & Production. Bring your energy.
                 </p>
               </div>
 
-              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
                 <button
                   onClick={() => setShowForm(true)}
-                  className="w-full sm:w-auto px-8 py-4 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-red-600/30 flex items-center justify-center gap-3 group text-sm"
+                  className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-red-600/30 flex items-center justify-center gap-3 group text-xs sm:text-sm"
                 >
                   <span>APPLY NOW</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button
                   onClick={handleCloseAll}
-                  className="w-full sm:w-auto px-6 py-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white font-bold uppercase tracking-wider rounded-xl transition-colors text-sm"
+                  className="w-full sm:w-auto px-5 sm:px-6 py-3.5 sm:py-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white font-bold uppercase tracking-wider rounded-xl transition-colors text-xs sm:text-sm"
                 >
                   Explore Website First
                 </button>
@@ -141,30 +141,30 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
             /* SUCCESS MESSAGE */
             <div className="text-center py-8 space-y-6">
               <CheckCircle2 className="w-16 h-16 text-red-500 mx-auto" />
-              <h3 className="text-3xl font-bold uppercase tracking-tight">Application Received</h3>
+              <h3 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight">Application Received</h3>
               <p className="text-zinc-400 max-w-md mx-auto text-sm leading-relaxed">
                 We’ve got your transmission. Our team will review your work and get back to you soon. Stay loud.
               </p>
               <button
                 onClick={handleCloseAll}
-                className="px-8 py-3.5 bg-white text-black font-extrabold uppercase tracking-wider text-xs hover:bg-red-600 hover:text-white transition-colors rounded-xl"
+                className="w-full sm:w-auto px-8 py-3.5 bg-white text-black font-extrabold uppercase tracking-wider text-xs hover:bg-red-600 hover:text-white transition-colors rounded-xl"
               >
                 Close & Return to Site
               </button>
             </div>
           ) : (
             /* STEP 2: ACTUAL APPLICATION FORM (Opens directly on Navbar JOIN US click) */
-            <div className="max-h-[75vh] overflow-y-auto pr-2">
-              <div className="text-center mb-8">
+            <div className="max-h-[78vh] sm:max-h-[75vh] overflow-y-auto pr-1 sm:pr-2">
+              <div className="text-center mb-6 sm:mb-8">
                 <span className="text-xs uppercase tracking-[0.3em] font-mono text-red-500 mb-2 block">
                   // RECRUITMENT APPLICATION
                 </span>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tight">
                   TELL US ABOUT YOURSELF
                 </h2>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-8">
+              <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
                 
                 {/* SECTION 1 */}
                 <div>
@@ -180,7 +180,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         required
                         value={formData.fullName}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                       />
                     </div>
                     <div>
@@ -191,7 +191,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         required
                         value={formData.contact}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                       />
                     </div>
                     <div className="md:col-span-2">
@@ -202,7 +202,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         required
                         value={formData.yearBranch}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                       />
                     </div>
                   </div>
@@ -221,7 +221,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         required
                         value={formData.primaryRole}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                       >
                         <option value="">Select role...</option>
                         <option value="Graphic Design">Graphic & Visual Design</option>
@@ -242,7 +242,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         name="secondPick"
                         value={formData.secondPick}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                       />
                     </div>
                     <div>
@@ -252,7 +252,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         required
                         value={formData.skillLevel}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                       >
                         <option value="">Select level...</option>
                         <option value="Just getting started">Just getting started</option>
@@ -269,7 +269,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         required
                         value={formData.tools}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                       />
                     </div>
                   </div>
@@ -288,7 +288,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         name="portfolio"
                         value={formData.portfolio}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                       />
                     </div>
                     <div>
@@ -299,7 +299,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         rows="2"
                         value={formData.proudProject}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm resize-none"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm resize-none"
                       />
                     </div>
                   </div>
@@ -320,7 +320,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                           rows="2"
                           value={formData.whyRenderDrops}
                           onChange={handleChange}
-                          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm resize-none"
+                          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm resize-none"
                         />
                       </div>
                       <div>
@@ -331,7 +331,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                           rows="2"
                           value={formData.bringingToTable}
                           onChange={handleChange}
-                          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm resize-none"
+                          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm resize-none"
                         />
                       </div>
                     </div>
@@ -344,7 +344,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                           required
                           value={formData.skillToLearn}
                           onChange={handleChange}
-                          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                         />
                       </div>
                       <div>
@@ -355,7 +355,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                           required
                           value={formData.creativePersonality}
                           onChange={handleChange}
-                          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                         />
                       </div>
                     </div>
@@ -375,7 +375,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         required
                         value={formData.timeCommitment}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                       >
                         <option value="">Select hours...</option>
                         <option value="1–3 hrs">1–3 hrs</option>
@@ -391,7 +391,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         required
                         value={formData.deadlinesAttitude}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                       >
                         <option value="">Select option...</option>
                         <option value="Absolutely">Absolutely</option>
@@ -406,7 +406,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                         required
                         value={formData.outsideRoleComfort}
                         onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm"
                       >
                         <option value="">Select option...</option>
                         <option value="Yes">Yes</option>
@@ -430,23 +430,23 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
                       rows="2"
                       value={formData.finalReason}
                       onChange={handleChange}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-sm resize-none"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none text-base sm:text-sm resize-none"
                     />
                   </div>
                 </div>
 
-                <div className="flex gap-4 pt-4">
+                <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
                   <button
                     type="button"
                     onClick={() => setShowForm(false)}
-                    className="w-1/3 py-3.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-bold uppercase tracking-wider rounded-xl text-xs transition-colors"
+                    className="w-full sm:w-1/3 py-3.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-bold uppercase tracking-wider rounded-xl text-xs sm:text-sm transition-colors"
                   >
                     Back
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-2/3 py-3.5 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-wider rounded-xl text-xs transition-colors shadow-lg shadow-red-600/20 flex items-center justify-center gap-2"
+                    className="w-full sm:w-2/3 py-3.5 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-wider rounded-xl text-xs sm:text-sm transition-colors shadow-lg shadow-red-600/20 flex items-center justify-center gap-2"
                   >
                     <span>{isSubmitting ? 'Submitting...' : 'Submit Application Form'}</span>
                     <Send className="w-4 h-4" />

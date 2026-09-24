@@ -9,18 +9,18 @@ export default function ProjectModal({ project, onClose }) {
       {/* Background click to close */}
       <div className="absolute inset-0" onClick={onClose}></div>
 
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-rd-dark border border-white/15 shadow-2xl p-6 sm:p-8 z-10 text-white">
+      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-rd-dark border border-white/15 shadow-2xl p-4 sm:p-6 md:p-8 z-10 text-white">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 bg-rd-card hover:bg-rd-red text-zinc-300 hover:text-white border border-white/10 transition-colors"
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 bg-rd-card hover:bg-rd-red text-zinc-300 hover:text-white border border-white/10 transition-colors z-20"
           aria-label="Close Project Modal"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header Badges */}
-        <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
           <span className="px-3 py-1 bg-rd-red text-white text-[11px] font-black tracking-widest uppercase">
             {project.category}
           </span>
@@ -33,7 +33,7 @@ export default function ProjectModal({ project, onClose }) {
         </div>
 
         {/* Project Title */}
-        <h2 className="font-display text-3xl sm:text-5xl uppercase tracking-tight mb-3 text-white">
+        <h2 className="font-display text-2xl sm:text-4xl md:text-5xl uppercase tracking-tight mb-3 text-white">
           {project.title}
         </h2>
         

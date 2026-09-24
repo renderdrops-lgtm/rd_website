@@ -25,7 +25,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#0a0a0a] border-t border-white/6 pt-16 pb-8 px-4 sm:px-6 lg:px-8 relative" style={{overflowX:'clip'}}>
       {/* Subtle red gradient at top-left */}
-      <div className="absolute top-0 left-0 w-[400px] h-[200px] bg-rd-red/5 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full max-w-[400px] h-[200px] bg-rd-red/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Top Row */}
@@ -121,7 +121,7 @@ export default function Footer() {
           <p className="text-zinc-700 text-xs tracking-wider font-mono">
             © 2025 RENDERDROPS — ALL FRAMES RESERVED.
           </p>
-          <div className="flex items-center gap-4 text-xs">
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 text-xs">
             <a
               href="/admin"
               onClick={(e) => {

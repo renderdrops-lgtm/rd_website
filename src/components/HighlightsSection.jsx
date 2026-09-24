@@ -51,7 +51,7 @@ export default function HighlightsSection() {
             04 / HIGHLIGHTS
           </div>
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <h2 className="font-display text-4xl sm:text-6xl md:text-7xl uppercase tracking-tight text-white leading-none">
+            <h2 className="font-display text-3xl sm:text-5xl md:text-7xl uppercase tracking-tight text-white leading-none">
               PROOF,{' '}
               <span
                 style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.7)', color: 'transparent' }}
@@ -68,7 +68,7 @@ export default function HighlightsSection() {
           {updatedHighlights.map((item, idx) => (
             <div
               key={idx}
-              className="group bg-rd-card border border-white/8 hover:border-rd-red/50 p-7 flex flex-col gap-5 transition-all duration-400 relative overflow-hidden card-top-bar hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.7)]"
+              className="group bg-rd-card border border-white/8 hover:border-rd-red/50 p-6 sm:p-7 flex flex-col gap-5 transition-all duration-400 relative overflow-hidden card-top-bar hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.7)]"
             >
               {/* Subtle corner glow */}
               <div className="absolute -bottom-12 -right-12 w-36 h-36 bg-rd-red/5 group-hover:bg-rd-red/10 rounded-full blur-2xl transition-all duration-500 pointer-events-none" />
@@ -82,9 +82,9 @@ export default function HighlightsSection() {
 
               {/* Stat — metallic red gradient */}
               <div>
-                <div className="font-display text-6xl sm:text-7xl text-white group-hover:text-rd-red transition-colors duration-400 leading-none tracking-tight">
+                <div className="font-display text-5xl sm:text-6xl lg:text-7xl text-white group-hover:text-rd-red transition-colors duration-400 leading-none tracking-tight">
                   {item.stat}
-                  <span className="text-zinc-600 text-3xl ml-1 group-hover:text-rd-red/60 transition-colors">{item.label}</span>
+                  <span className="text-zinc-600 text-2xl sm:text-3xl ml-1 group-hover:text-rd-red/60 transition-colors">{item.label}</span>
                 </div>
               </div>
 
@@ -161,7 +161,7 @@ export default function HighlightsSection() {
                 <p className="text-xs text-zinc-500 mt-1">Chief Guest Feature</p>
               </div>
             </div>
-            <div className="shrink-0 px-5 py-2.5 border border-rd-red/40 bg-rd-red/10 text-rd-red text-[10px] font-black tracking-[0.25em] uppercase whitespace-nowrap">
+            <div className="w-full sm:w-auto text-center sm:text-left px-5 py-2.5 border border-rd-red/40 bg-rd-red/10 text-rd-red text-[10px] font-black tracking-[0.25em] uppercase">
               1 CHIEF GUEST SPOTLIGHT
             </div>
           </div>

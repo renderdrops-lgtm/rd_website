@@ -35,7 +35,7 @@ export default function ReelWall() {
   return (
     <section id="reel" className="py-24 bg-rd-dark/60 relative select-none overflow-hidden" style={{ overflowX: 'clip' }}>
       {/* Subtle ambient light */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[300px] bg-rd-red/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-full max-w-[500px] h-[300px] bg-rd-red/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative z-10">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b border-white/8">
@@ -44,7 +44,7 @@ export default function ReelWall() {
               <span className="w-6 h-[1.5px] bg-rd-red inline-block"></span>
               FRAMES FROM THE FLOOR
             </div>
-            <h2 className="font-display text-4xl sm:text-6xl md:text-7xl uppercase tracking-tight text-white leading-none">
+            <h2 className="font-display text-3xl sm:text-5xl md:text-7xl uppercase tracking-tight text-white leading-none">
               THE REEL <br className="sm:hidden" />
               <span className="text-rd-red">KEEPS ROLLING</span>
             </h2>
@@ -53,14 +53,14 @@ export default function ReelWall() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => scroll(-1)}
-              className="w-12 h-12 bg-rd-card border border-white/10 hover:bg-rd-red hover:border-rd-red text-white flex items-center justify-center transition-all duration-200"
+              className="w-10 h-10 sm:w-12 sm:h-12 bg-rd-card border border-white/10 hover:bg-rd-red hover:border-rd-red text-white flex items-center justify-center transition-all duration-200"
               aria-label="Scroll Left"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={() => scroll(1)}
-              className="w-12 h-12 bg-rd-card border border-white/10 hover:bg-rd-red hover:border-rd-red text-white flex items-center justify-center transition-all duration-200"
+              className="w-10 h-10 sm:w-12 sm:h-12 bg-rd-card border border-white/10 hover:bg-rd-red hover:border-rd-red text-white flex items-center justify-center transition-all duration-200"
               aria-label="Scroll Right"
             >
               <ChevronRight className="w-5 h-5" />
@@ -72,7 +72,7 @@ export default function ReelWall() {
       {/* Horizontal Scroll Track */}
       <div
         ref={scrollRef}
-        className="flex gap-5 overflow-x-auto no-scrollbar px-4 sm:px-8 pb-6 snap-x snap-mandatory relative z-10"
+        className="flex gap-4 sm:gap-5 overflow-x-auto no-scrollbar px-4 sm:px-8 pb-6 snap-x snap-mandatory relative z-10"
         onMouseDown={(e) => {
           const el = scrollRef.current;
           let startX = e.clientX;
@@ -93,7 +93,7 @@ export default function ReelWall() {
         {reelFrames.map((frame, idx) => (
           <div
             key={idx}
-            className="group relative flex-none w-[300px] sm:w-[360px] lg:w-[420px] aspect-[3/4] overflow-hidden bg-rd-black border border-white/10 hover:border-rd-red/60 snap-start transition-all duration-400 card-top-bar hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.85)] cursor-grab active:cursor-grabbing flex flex-col justify-between"
+            className="group relative flex-none w-[82vw] max-w-[300px] sm:max-w-[360px] sm:w-[360px] lg:w-[420px] aspect-[3/4] overflow-hidden bg-rd-black border border-white/10 hover:border-rd-red/60 snap-start transition-all duration-400 card-top-bar hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.85)] cursor-grab active:cursor-grabbing flex flex-col justify-between"
           >
             {/* Image: Black & White by default, color on hover */}
             <img

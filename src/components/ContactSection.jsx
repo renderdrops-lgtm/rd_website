@@ -42,7 +42,7 @@ export default function ContactSection() {
 
   // Premium bottom-border focus input
   const inputClass = (field) =>
-    `w-full bg-rd-card text-white px-5 py-4 text-sm font-medium border-b-2 border-t-0 border-l-0 border-r-0 transition-all duration-300 outline-none focus:ring-0 placeholder-zinc-700 ${
+    `w-full bg-rd-card text-white px-5 py-4 text-base sm:text-sm font-medium border-b-2 border-t-0 border-l-0 border-r-0 transition-all duration-300 outline-none focus:ring-0 placeholder-zinc-700 ${
       errors[field]
         ? 'border-red-500/60 bg-red-900/8'
         : 'border-white/10 focus:border-rd-red/70 hover:border-white/25 bg-rd-card'
@@ -51,7 +51,7 @@ export default function ContactSection() {
   return (
     <section id="contact" className="py-28 px-4 sm:px-6 lg:px-8 bg-rd-black relative" style={{overflowX:'clip'}}>
       {/* Ambient glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-rd-red/8 blur-[160px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[600px] h-[400px] bg-rd-red/8 blur-[160px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
@@ -60,7 +60,7 @@ export default function ContactSection() {
             <span className="w-8 h-[1.5px] bg-rd-red inline-block" />
             06 / WORK WITH US
           </div>
-          <h2 className="font-display text-4xl sm:text-6xl md:text-7xl uppercase tracking-tight text-white leading-none mb-4">
+          <h2 className="font-display text-3xl sm:text-5xl md:text-7xl uppercase tracking-tight text-white leading-none mb-4">
             GOT AN IDEA?{' '}
             <br className="hidden sm:inline" />
             <span className="text-rd-red">LET'S MAKE IT LOUD.</span>
@@ -74,11 +74,11 @@ export default function ContactSection() {
           {/* Left: Form */}
           <div className="lg:col-span-3">
             {submitted ? (
-              <div className="flex flex-col items-center justify-center min-h-[440px] bg-rd-card border border-rd-red/25 p-10 text-center relative overflow-hidden">
+              <div className="flex flex-col items-center justify-center min-h-[440px] bg-rd-card border border-rd-red/25 p-6 sm:p-10 text-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-rd-red/3 pointer-events-none" />
                 <div className="absolute -top-20 -right-20 w-64 h-64 bg-rd-red/10 blur-3xl rounded-full pointer-events-none" />
                 <CheckCircle2 className="w-16 h-16 text-rd-red mb-6 relative z-10 drop-shadow-[0_0_20px_rgba(227,27,46,0.6)]" />
-                <h3 className="font-display text-3xl sm:text-4xl text-white uppercase tracking-tight mb-3 relative z-10">
+                <h3 className="font-display text-2xl sm:text-3xl md:text-4xl text-white uppercase tracking-tight mb-3 relative z-10">
                   ENQUIRY RECEIVED
                 </h3>
                 <p className="text-zinc-400 text-base leading-relaxed max-w-sm relative z-10">

@@ -26,7 +26,7 @@ export default function ServicesSection() {
               <span className="w-8 h-[1.5px] bg-rd-red inline-block" />
               02 / WHAT WE DO
             </div>
-            <h2 className="font-display text-4xl sm:text-6xl md:text-7xl uppercase tracking-tight leading-none text-rd-dark-text">
+            <h2 className="font-display text-3xl sm:text-5xl md:text-7xl uppercase tracking-tight leading-none text-rd-dark-text">
               FOUR CRAFTS.<br />
               <span className="text-rd-red">ONE STANDARD:</span>{' '}
               <span className="[-webkit-text-stroke:1.5px_#141414] text-transparent">LOUD.</span>
@@ -114,6 +114,7 @@ export default function ServicesSection() {
                   className={`group relative transition-all duration-400 cursor-pointer ${
                     isHov ? 'bg-[#141414]' : 'bg-white hover:bg-zinc-50'
                   }`}
+                  onClick={() => setHovered(isHov ? null : service.number)}
                   onMouseEnter={() => setHovered(service.number)}
                   onMouseLeave={() => setHovered(null)}
                 >
@@ -124,23 +125,23 @@ export default function ServicesSection() {
                   />
 
                   {/* Main row */}
-                  <div className="flex items-center justify-between px-7 sm:px-10 py-7">
-                    <div className="flex items-center gap-6 sm:gap-8 min-w-0">
+                  <div className="flex items-center justify-between px-4 sm:px-8 lg:px-10 py-5 sm:py-7">
+                    <div className="flex items-center gap-4 sm:gap-8 min-w-0">
                       <span className="font-mono text-xs font-black tracking-widest shrink-0 text-rd-red">{service.number}</span>
-                      <h3 className={`font-display text-2xl sm:text-4xl md:text-5xl uppercase tracking-tight truncate transition-colors duration-400 ${
+                      <h3 className={`font-display text-xl sm:text-3xl md:text-5xl uppercase tracking-tight truncate transition-colors duration-400 ${
                         isHov ? 'text-white' : 'text-rd-dark-text'
                       }`}>
                         {service.title}
                       </h3>
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0 ml-4">
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-3 sm:ml-4">
                       <div className={`hidden sm:flex w-9 h-9 items-center justify-center transition-all duration-300 ${
                         isHov ? 'bg-rd-red text-white shadow-[0_0_16px_rgba(227,27,46,0.5)]' : 'bg-transparent border border-zinc-300 text-zinc-400'
                       }`}>
                         <Icon className="w-4 h-4" />
                       </div>
-                      <div className={`w-9 h-9 flex items-center justify-center border transition-all duration-300 ${
+                      <div className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center border transition-all duration-300 ${
                         isHov ? 'bg-rd-red border-rd-red text-white' : 'border-zinc-300 text-zinc-400 -rotate-45'
                       }`}>
                         <ArrowUpRight className="w-4 h-4" />
@@ -151,9 +152,9 @@ export default function ServicesSection() {
                   {/* Expanded deliverables */}
                   <div
                     className="overflow-hidden transition-all duration-500 ease-out"
-                    style={{ maxHeight: isHov ? '260px' : '0px', opacity: isHov ? 1 : 0 }}
+                    style={{ maxHeight: isHov ? '500px' : '0px', opacity: isHov ? 1 : 0 }}
                   >
-                    <div className="px-7 sm:px-10 pb-8 flex flex-col sm:flex-row gap-8">
+                    <div className="px-4 sm:px-8 lg:px-10 pb-6 sm:pb-8 flex flex-col sm:flex-row gap-6 sm:gap-8">
                       <div className="flex-1">
                         <p className="text-zinc-400 text-sm leading-relaxed mb-5">{service.summary}</p>
                         <a

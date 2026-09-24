@@ -116,7 +116,7 @@ export default function Hero() {
 
       {/* Red ambient glow bottom-left */}
       <div
-        className="absolute bottom-0 left-0 w-[600px] h-[400px] pointer-events-none"
+        className="absolute bottom-0 left-0 w-full max-w-[600px] h-[400px] pointer-events-none"
         style={{
           zIndex: 1,
           background: 'radial-gradient(ellipse at 15% 100%, rgba(227,27,46,0.18) 0%, transparent 70%)',
@@ -126,21 +126,21 @@ export default function Hero() {
       {/* ── Hero Content ── */}
       <div
         ref={contentRef}
-        className="relative w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 pt-28 pb-24 flex flex-col items-start"
+        className="relative w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 pt-24 sm:pt-28 pb-16 sm:pb-24 flex flex-col items-start"
         style={{ zIndex: 2, willChange: 'opacity, transform' }}
       >
         {/* Tagline badge */}
-        <div className="animate-fade-in-up-1 inline-flex items-center gap-3 px-4 py-1.5 mb-10 border border-white/12 bg-black/70 backdrop-blur-md">
+        <div className="animate-fade-in-up-1 inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 mb-8 sm:mb-10 border border-white/12 bg-black/70 backdrop-blur-md max-w-full">
           <span className="w-2 h-2 rounded-full bg-rd-red animate-ping shrink-0" />
-          <span className="text-[11px] sm:text-xs font-bold tracking-[0.25em] text-zinc-300 uppercase">
+          <span className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.25em] text-zinc-300 uppercase truncate">
             DESIGN — CREATE — SHOOT — EDIT
           </span>
         </div>
 
         {/* Headline */}
         <h1
-          className="animate-fade-in-up-2 font-display uppercase leading-[0.88] tracking-tight select-none mb-8"
-          style={{ fontSize: 'clamp(3.5rem, 10vw, 9rem)' }}
+          className="animate-fade-in-up-2 font-display uppercase leading-[0.9] tracking-tight select-none mb-6 sm:mb-8 max-w-full break-words"
+          style={{ fontSize: 'clamp(2.3rem, 8.5vw, 8.5rem)' }}
         >
           <div className="text-metallic">WE MAKE</div>
           <div
@@ -149,28 +149,28 @@ export default function Hero() {
           >
             IDEAS
           </div>
-          <div><CyclingWord /></div>
+          <div className="break-words"><CyclingWord /></div>
           <div className="text-metallic">TO IGNORE.</div>
         </h1>
 
         {/* Subtext */}
-        <p className="animate-fade-in-up-3 max-w-xl text-base sm:text-lg text-zinc-400 font-normal leading-relaxed mb-10">
+        <p className="animate-fade-in-up-3 max-w-xl text-sm sm:text-base md:text-lg text-zinc-400 font-normal leading-relaxed mb-8 sm:mb-10">
           RenderDrops is a creative studio building visuals, motion, media and
           experiences — student energy, production muscle, real-world results.
         </p>
 
         {/* CTAs */}
-        <div className="animate-fade-in-up-4 flex flex-col sm:flex-row items-start gap-4">
+        <div className="animate-fade-in-up-4 flex flex-col sm:flex-row items-stretch sm:items-start gap-3 sm:gap-4 w-full sm:w-auto">
           <a
             href="#work"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-rd-red hover:bg-rd-red-hover text-white text-xs sm:text-sm font-extrabold tracking-widest uppercase transition-all duration-300 shadow-[0_0_35px_rgba(227,27,46,0.55)] hover:shadow-[0_0_60px_rgba(227,27,46,0.9)] shimmer-btn group"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-rd-red hover:bg-rd-red-hover text-white text-xs sm:text-sm font-extrabold tracking-widest uppercase transition-all duration-300 shadow-[0_0_35px_rgba(227,27,46,0.55)] hover:shadow-[0_0_60px_rgba(227,27,46,0.9)] shimmer-btn group"
           >
             <span>VIEW WORK</span>
             <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </a>
           <a
             href="#contact"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white/6 hover:bg-white/12 text-white text-xs sm:text-sm font-extrabold tracking-widest uppercase border border-white/20 hover:border-white/40 backdrop-blur-md transition-all duration-300"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-white/6 hover:bg-white/12 text-white text-xs sm:text-sm font-extrabold tracking-widest uppercase border border-white/20 hover:border-white/40 backdrop-blur-md transition-all duration-300"
           >
             <span>WORK WITH US</span>
             <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />

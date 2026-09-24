@@ -5,7 +5,7 @@ export default function ManifestoSection() {
   return (
     <section id="about" className="py-28 px-4 sm:px-6 lg:px-8 bg-rd-black relative" style={{overflowX:'clip'}}>
       {/* Ambient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-rd-red/7 blur-[130px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-[350px] bg-rd-red/7 blur-[130px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
@@ -15,7 +15,7 @@ export default function ManifestoSection() {
             03 / MANIFESTO
           </div>
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <h2 className="font-display text-4xl sm:text-6xl md:text-7xl uppercase tracking-tight text-white leading-none max-w-4xl">
+            <h2 className="font-display text-3xl sm:text-5xl md:text-7xl uppercase tracking-tight text-white leading-none max-w-4xl">
               BORN IN A COMMITTEE.<br />
               <span
                 style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.7)', color: 'transparent' }}
@@ -32,7 +32,7 @@ export default function ManifestoSection() {
           {manifestoPillars.map((pillar, idx) => (
             <div
               key={idx}
-              className="group bg-rd-card border border-white/8 hover:border-rd-red/40 p-8 flex flex-col justify-between transition-all duration-400 relative overflow-hidden card-top-bar hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
+              className="group bg-rd-card border border-white/8 hover:border-rd-red/40 p-5 sm:p-8 flex flex-col justify-between transition-all duration-400 relative overflow-hidden card-top-bar hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
             >
               {/* Subtle corner glow */}
               <div className="absolute -bottom-16 -right-16 w-48 h-48 bg-rd-red/6 group-hover:bg-rd-red/12 rounded-full blur-3xl transition-all duration-600 pointer-events-none" />
