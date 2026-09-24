@@ -45,7 +45,7 @@ const collectiveMembers = [
   {
     name: "Ankith Raj K S",
     role: "Core Creative & Media Division",
-    image: ""
+    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/ankith.webp"
   },
   {
     name: "Anush Kiran K S",
@@ -60,7 +60,7 @@ const collectiveMembers = [
   {
     name: "Shekar T",
     role: "Production & Operations Division",
-    image: ""
+    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/shekar.webp"
   },
   {
     name: "Rajat N Gouda",
@@ -75,12 +75,12 @@ const collectiveMembers = [
   {
     name: "Aditya Naravi",
     role: "Creative & Media Division",
-    image: ""
+    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/aditya%20(1).webp"
   },
   {
     name: "Vivek",
     role: "Creative & Media Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-22%20at%2011.06.18%20PM.jpeg"
+    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/vivek.webp"
   },
   {
     name: "Yashas",
@@ -95,7 +95,7 @@ const collectiveMembers = [
   {
     name: "Prajwal Sagar",
     role: "Brand & Communication Division",
-    image: ""
+    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/prajwal.webp"
   },
   {
     name: "Tejaswini",
