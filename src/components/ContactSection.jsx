@@ -84,7 +84,7 @@ export default function ContactSection() {
                 <p className="text-zinc-400 text-base leading-relaxed max-w-sm relative z-10">
                   We've got your brief. Expect a response within <strong className="text-white">48 hours</strong> with a plan and a quote.
                 </p>
-                <div className="mt-8 text-xs font-black tracking-[0.3em] text-rd-red uppercase relative z-10">RENDERDROPS.CO</div>
+                <div className="mt-8 text-xs font-black tracking-[0.3em] text-rd-red uppercase relative z-10">RENDERDROPS.IN</div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5" noValidate>

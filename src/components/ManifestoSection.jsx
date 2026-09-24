@@ -78,7 +78,7 @@ export default function ManifestoSection() {
         {/* Watermark text */}
         <div className="mt-20 text-center overflow-hidden">
           <p className="font-display text-[clamp(2.5rem,8vw,7rem)] text-white/5 tracking-tight uppercase select-none leading-none">
-            RENDERDROPS.CO
+            RENDERDROPS.IN
           </p>
         </div>
       </div>
