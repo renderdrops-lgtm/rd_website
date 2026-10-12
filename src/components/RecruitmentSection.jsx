@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Send, CheckCircle2, X, ArrowRight } from 'lucide-react';
+import { Send, CheckCircle2, X, ArrowRight, Ticket, Calendar, MapPin, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose }) {
+export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose, onNavigateToFreshers }) {
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,48 +90,136 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4 md:p-6 overflow-y-auto">
       
       {/* Modal Container */}
-      <div className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 text-white rounded-2xl shadow-2xl my-4 sm:my-8 p-5 sm:p-8 md:p-12 overflow-hidden">
+      <div className={`relative w-full ${!showForm && !submitted ? 'max-w-4xl lg:max-w-5xl' : 'max-w-2xl'} bg-zinc-950 border border-zinc-800 text-white rounded-2xl sm:rounded-3xl shadow-2xl my-4 sm:my-8 p-5 sm:p-7 md:p-9 overflow-hidden transition-all duration-300`}>
         
         {/* Close Button */}
         <button
           onClick={handleCloseAll}
-          className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-full transition-colors z-20"
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-full transition-colors z-20 cursor-pointer"
+          aria-label="Close modal"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Background Glow Accent */}
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-[400px] h-[200px] bg-red-600/15 blur-[120px] pointer-events-none rounded-full" />
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[220px] bg-red-600/10 blur-[130px] pointer-events-none rounded-full" />
 
         <div className="relative z-10">
           
           {!showForm && !submitted ? (
-            /* STEP 1: TEASER / WELCOME POPUP (On Page Load) */
-            <div className="text-center py-4 sm:py-6 space-y-6 sm:space-y-8">
-              <span className="text-xs uppercase tracking-[0.3em] font-mono text-red-500 inline-block bg-red-600/10 px-4 py-1.5 rounded-full border border-red-600/20">
-                // JOIN THE COLLECTIVE
-              </span>
-              
-              <div className="space-y-3 sm:space-y-4">
-                <h2 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tighter uppercase leading-none">
-                  WE'RE ON THE LOOKOUT
+            /* STEP 1: DUAL SPLIT MODAL (Recruitment + Freshers Party Pass) */
+            <div className="py-2 sm:py-3">
+              <div className="text-center mb-6 sm:mb-8 space-y-2">
+                <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] font-mono text-zinc-400 inline-block bg-zinc-900/90 px-3.5 py-1.5 rounded-full border border-zinc-800">
+                  // RENDERDROPS DISPATCH
+                </span>
+                <h2 className="text-2xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-white">
+                  CHOOSE YOUR ACCESS
                 </h2>
-                <p className="text-zinc-300 text-sm sm:text-base md:text-lg max-w-lg mx-auto leading-relaxed">
-                  Talent Acquisition for Design, VFX, Strategy, PR, Content & Production. Bring your energy.
+                <p className="text-zinc-400 text-xs sm:text-sm max-w-md mx-auto">
+                  Step into the RenderDrops ecosystem. Join our creative agency or reserve your spot at the biggest party of the semester.
                 </p>
               </div>
 
-              <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-red-600/30 flex items-center justify-center gap-3 group text-xs sm:text-sm"
-                >
-                  <span>APPLY NOW</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
+              {/* Side-by-Side Dual Card Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                
+                {/* LEFT CARD: Recruitment Teaser */}
+                <div className="relative group bg-zinc-900/50 hover:bg-zinc-900/80 border border-zinc-800 hover:border-red-600/50 rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-2xl pointer-events-none" />
+                  
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[10px] uppercase tracking-[0.25em] font-mono text-red-400 font-bold bg-red-950/60 border border-red-800/40 px-2.5 py-1 rounded-full">
+                        RECRUITMENT 2026
+                      </span>
+                      <span className="text-xs text-zinc-500 font-mono">CORE TEAM</span>
+                    </div>
+
+                    <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white mb-2 leading-snug">
+                      Join The Collective
+                    </h3>
+                    
+                    <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed mb-4">
+                      Talent acquisition for Design, VFX, Strategy, PR, Content & Production. Bring your energy and build culture with us.
+                    </p>
+
+                    <div className="flex flex-wrap gap-1.5 mb-6">
+                      {['VFX', '3D Design', 'Strategy', 'PR & Media', 'Content', 'Audio'].map((role) => (
+                        <span key={role} className="text-[10px] font-mono bg-zinc-950/80 text-zinc-300 border border-zinc-800 px-2 py-0.5 rounded">
+                          {role}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="w-full py-3.5 px-4 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 group/btn text-xs sm:text-sm cursor-pointer"
+                  >
+                    <span>Apply Now</span>
+                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+
+                {/* RIGHT CARD: Freshers Party Pass Banner */}
+                <div className="relative group bg-gradient-to-b from-zinc-900/80 via-zinc-900/60 to-zinc-950 border border-amber-500/40 hover:border-amber-400/80 rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 overflow-hidden shadow-[0_0_35px_rgba(245,158,11,0.09)]">
+                  <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/15 rounded-full blur-2xl pointer-events-none" />
+                  
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[10px] uppercase tracking-[0.25em] font-mono text-amber-400 font-bold bg-amber-950/70 border border-amber-600/40 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        EXCLUSIVE NIGHT 🎟️
+                      </span>
+                      <span className="text-xs text-amber-400 font-black font-mono">FROM ₹359</span>
+                    </div>
+
+                    <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white mb-2 leading-snug">
+                      Freshers Party Pass
+                    </h3>
+                    
+                    <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed mb-4">
+                      The official high-octane luxury freshers celebration. VIP perks, celebrity DJ vibes & premium club experience.
+                    </p>
+
+                    <div className="space-y-1.5 mb-6 bg-zinc-950/70 border border-zinc-800 rounded-xl p-3 text-xs">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <span className="font-semibold text-white">November 7, 2026</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <span className="text-zinc-400">Finn – The Luxury Club</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      handleCloseAll();
+                      if (onNavigateToFreshers) {
+                        onNavigateToFreshers();
+                      } else {
+                        window.history.pushState({}, '', '/freshers-pass');
+                        window.dispatchEvent(new PopStateEvent('popstate'));
+                      }
+                    }}
+                    className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-black font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 group/pass text-xs sm:text-sm cursor-pointer"
+                  >
+                    <Ticket className="w-4 h-4 text-black" />
+                    <span>Get Party Passes</span>
+                    <ArrowRight className="w-4 h-4 group-hover/pass:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+
+              </div>
+
+              {/* Bottom Subtle Dismiss */}
+              <div className="text-center mt-5">
                 <button
                   onClick={handleCloseAll}
-                  className="w-full sm:w-auto px-5 sm:px-6 py-3.5 sm:py-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white font-bold uppercase tracking-wider rounded-xl transition-colors text-xs sm:text-sm"
+                  className="text-xs font-mono text-zinc-500 hover:text-zinc-300 uppercase tracking-widest transition-colors py-1 cursor-pointer"
                 >
                   Explore Website First
                 </button>
@@ -155,6 +243,16 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose })
           ) : (
             /* STEP 2: ACTUAL APPLICATION FORM (Opens directly on Navbar JOIN US click) */
             <div className="max-h-[78vh] sm:max-h-[75vh] overflow-y-auto pr-1 sm:pr-2">
+              {mode === 'teaser' && (
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-400 hover:text-white uppercase tracking-wider mb-4 transition-colors cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back to Options</span>
+                </button>
+              )}
               <div className="text-center mb-6 sm:mb-8">
                 <span className="text-xs uppercase tracking-[0.3em] font-mono text-red-500 mb-2 block">
                   // RECRUITMENT APPLICATION
