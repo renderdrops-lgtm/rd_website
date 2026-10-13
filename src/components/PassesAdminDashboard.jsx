@@ -121,13 +121,31 @@ export default function PassesAdminDashboard() {
   const analytics = useMemo(() => {
     const totalRev = tickets.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
     const totalAdmit = tickets.reduce((sum, t) => sum + (Number(t.quantity) || 1), 0);
+    
+    // Promo TXJAS.AFTDARK7 specific metrics
+    const txjasTickets = tickets.filter(t => (t.promo_code || '').toUpperCase() === 'TXJAS.AFTDARK7');
+    const txjasCount = txjasTickets.length;
+    const txjasDiscountSaved = txjasTickets.reduce((sum, t) => sum + (Number(t.discount_amount) || 0), 0);
     const totalPromoUsed = tickets.filter(t => t.promo_code).length;
     const totalDiscountSaved = tickets.reduce((sum, t) => sum + (Number(t.discount_amount) || 0), 0);
 
-    const tierBreakdown = {};
+    // Exact Tier breakdown: Early Bird, Stag Entry, Couple Pass, Group of 5, Group of 10
+    const tiers = {
+      'Early Bird': { count: 0, admits: 0, revenue: 0 },
+      'Stag Entry': { count: 0, admits: 0, revenue: 0 },
+      'Couple Pass': { count: 0, admits: 0, revenue: 0 },
+      'Group of 5': { count: 0, admits: 0, revenue: 0 },
+      'Group of 10': { count: 0, admits: 0, revenue: 0 }
+    };
+
     tickets.forEach(t => {
-      const type = t.pass_type || 'Unknown';
-      tierBreakdown[type] = (tierBreakdown[type] || 0) + 1;
+      const type = t.pass_type || 'Other';
+      if (!tiers[type]) {
+        tiers[type] = { count: 0, admits: 0, revenue: 0 };
+      }
+      tiers[type].count += 1;
+      tiers[type].admits += (Number(t.quantity) || 1);
+      tiers[type].revenue += (Number(t.amount) || 0);
     });
 
     return {
@@ -135,7 +153,9 @@ export default function PassesAdminDashboard() {
       totalAdmit,
       totalPromoUsed,
       totalDiscountSaved,
-      tierBreakdown,
+      txjasCount,
+      txjasDiscountSaved,
+      tiers,
       checkedInCount: checkedInIds.size
     };
   }, [tickets, checkedInIds]);
@@ -295,11 +315,19 @@ export default function PassesAdminDashboard() {
           </form>
 
           <div className="mt-8 pt-6 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono text-zinc-500">
-            <a href="/" className="hover:text-zinc-300 transition-colors flex items-center gap-1">
-              <ArrowLeft className="w-3.5 h-3.5" /> Back Home
+            <a 
+              href="/freshers-pass" 
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState({}, '', '/freshers-pass');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-amber-400 transition-colors flex items-center gap-1"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Freshers Pass
             </a>
-            <a href="/admin" className="hover:text-amber-400 transition-colors">
-              Recruitment Desk →
+            <a href="/" className="hover:text-zinc-300 transition-colors">
+              Studio Home →
             </a>
           </div>
         </div>
@@ -356,10 +384,16 @@ export default function PassesAdminDashboard() {
             </button>
 
             <a
-              href="/admin"
+              href="/freshers-pass"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState({}, '', '/freshers-pass');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-400 hover:text-white transition-colors"
             >
-              <span>Recruitment Desk</span>
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Passes</span>
             </a>
 
             <button
@@ -546,17 +580,85 @@ export default function PassesAdminDashboard() {
 
         </div>
 
-        {/* ── Category Breakdown Pills ── */}
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center gap-3 text-xs font-mono">
-          <span className="text-zinc-500 uppercase tracking-wider font-bold">Category Distribution:</span>
-          {Object.entries(analytics.tierBreakdown).map(([tierName, count]) => (
-            <span key={tierName} className="bg-zinc-950 border border-zinc-800 px-3 py-1 rounded-full text-zinc-300">
-              <strong className="text-amber-400">{tierName}</strong>: {count} passes
+        {/* ── Section 2.5: Breakdown by Pass Type & TXJAS.AFTDARK7 Promo Metrics ── */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+            <span className="uppercase tracking-wider font-bold text-white flex items-center gap-1.5">
+              <Ticket className="w-3.5 h-3.5 text-amber-400" />
+              BREAKDOWN BY PASS TYPE & PROMO
             </span>
-          ))}
-          {Object.keys(analytics.tierBreakdown).length === 0 && (
-            <span className="text-zinc-500">No ticket sales recorded yet</span>
-          )}
+            <span className="text-[11px] text-zinc-500 font-mono">
+              Live Categories • Finn Nov 7th
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 font-mono text-xs">
+            {/* Early Bird */}
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+              <span className="text-[10px] text-zinc-400 font-bold block uppercase">Early Bird</span>
+              <div className="text-xl font-bold text-white">
+                {analytics.tiers['Early Bird']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
+              </div>
+              <div className="text-[11px] text-amber-400">
+                ₹{(analytics.tiers['Early Bird']?.revenue || 0).toLocaleString('en-IN')}
+              </div>
+            </div>
+
+            {/* Stag Entry */}
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+              <span className="text-[10px] text-zinc-400 font-bold block uppercase">Stag Entry</span>
+              <div className="text-xl font-bold text-white">
+                {analytics.tiers['Stag Entry']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
+              </div>
+              <div className="text-[11px] text-amber-400">
+                ₹{(analytics.tiers['Stag Entry']?.revenue || 0).toLocaleString('en-IN')}
+              </div>
+            </div>
+
+            {/* Couple Pass */}
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+              <span className="text-[10px] text-zinc-400 font-bold block uppercase">Couple Pass</span>
+              <div className="text-xl font-bold text-white">
+                {analytics.tiers['Couple Pass']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
+              </div>
+              <div className="text-[11px] text-amber-400">
+                ₹{(analytics.tiers['Couple Pass']?.revenue || 0).toLocaleString('en-IN')}
+              </div>
+            </div>
+
+            {/* Group of 5 */}
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+              <span className="text-[10px] text-zinc-400 font-bold block uppercase">Group of 5</span>
+              <div className="text-xl font-bold text-white">
+                {analytics.tiers['Group of 5']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
+              </div>
+              <div className="text-[11px] text-amber-400">
+                ₹{(analytics.tiers['Group of 5']?.revenue || 0).toLocaleString('en-IN')}
+              </div>
+            </div>
+
+            {/* Group of 10 */}
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+              <span className="text-[10px] text-zinc-400 font-bold block uppercase">Group of 10</span>
+              <div className="text-xl font-bold text-white">
+                {analytics.tiers['Group of 10']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
+              </div>
+              <div className="text-[11px] text-amber-400">
+                ₹{(analytics.tiers['Group of 10']?.revenue || 0).toLocaleString('en-IN')}
+              </div>
+            </div>
+
+            {/* Promo TXJAS.AFTDARK7 */}
+            <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-3.5 space-y-1">
+              <span className="text-[10px] text-emerald-400 font-bold block uppercase truncate">TXJAS.AFTDARK7</span>
+              <div className="text-xl font-bold text-emerald-400">
+                {analytics.txjasCount} <span className="text-xs text-emerald-500/70 font-normal">used</span>
+              </div>
+              <div className="text-[11px] text-zinc-400">
+                -₹{analytics.txjasDiscountSaved.toLocaleString('en-IN')} saved
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* ── Section 3: Search, Filters & Main Data Table ── */}

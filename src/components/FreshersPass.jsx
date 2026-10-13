@@ -799,6 +799,19 @@ export default function FreshersPass({ onBackToHome }) {
             >
               BOOK PASSES
             </a>
+            <a
+              href="/admin/passes"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState({}, '', '/admin/passes');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="p-2 bg-zinc-900 border border-zinc-800 hover:border-amber-500/40 text-zinc-500 hover:text-amber-400 rounded-lg transition-colors cursor-pointer"
+              title="Organizers Gate Console"
+              aria-label="Organizers Gate Console"
+            >
+              <Lock className="w-3.5 h-3.5" />
+            </a>
           </div>
         </div>
       </header>
@@ -1385,9 +1398,24 @@ export default function FreshersPass({ onBackToHome }) {
 
       </main>
 
-      {/* Footer minimal */}
-      <footer className="border-t border-white/10 py-8 px-4 text-center text-xs font-mono text-zinc-600">
+      {/* Footer minimal with discreet organizer access */}
+      <footer className="border-t border-white/10 py-8 px-4 text-center text-xs font-mono text-zinc-600 space-y-2">
         <p>© 2026 RenderDrops Creative Studio. Event hosted at Finn – The Luxury Club. Strictly 18+ entry.</p>
+        <div className="pt-1">
+          <a
+            href="/admin/passes"
+            onClick={(e) => {
+              e.preventDefault();
+              window.history.pushState({}, '', '/admin/passes');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }}
+            className="hover:text-amber-400 transition-colors inline-flex items-center gap-1.5 opacity-40 hover:opacity-100 text-[11px]"
+            title="Organizer Door Access Console"
+          >
+            <Lock className="w-3 h-3 text-zinc-600" />
+            <span>Organizers Door Console</span>
+          </a>
+        </div>
       </footer>
     </div>
   );
