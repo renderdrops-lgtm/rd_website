@@ -14,11 +14,13 @@ import ScrollReveal from './components/ScrollReveal';
 import CustomCursor from './components/CustomCursor';
 import RecruitmentSection from './components/RecruitmentSection';
 import AdminDashboard from './components/AdminDashboard';
+import PassesAdminDashboard from './components/PassesAdminDashboard';
 import FreshersPass from './components/FreshersPass';
 import { ArrowUpRight } from 'lucide-react';
 
 function App() {
   const [isAdminRoute, setIsAdminRoute] = useState(false);
+  const [isPassesAdminRoute, setIsPassesAdminRoute] = useState(false);
   const [isFreshersRoute, setIsFreshersRoute] = useState(false);
   const [isRecruitmentOpen, setIsRecruitmentOpen] = useState(false);
   const [recruitmentMode, setRecruitmentMode] = useState('teaser');
@@ -26,17 +28,26 @@ function App() {
   useEffect(() => {
     const checkRoute = () => {
       const path = window.location.pathname.replace(/\/+$/, '') || '/';
+      if (path === '/admin/passes') {
+        setIsPassesAdminRoute(true);
+        setIsAdminRoute(false);
+        setIsFreshersRoute(false);
+        return;
+      }
       if (path === '/admin') {
         setIsAdminRoute(true);
+        setIsPassesAdminRoute(false);
         setIsFreshersRoute(false);
         return;
       }
       if (path === '/freshers-pass' || path === '/freshers') {
         setIsFreshersRoute(true);
         setIsAdminRoute(false);
+        setIsPassesAdminRoute(false);
         return;
       }
       setIsAdminRoute(false);
+      setIsPassesAdminRoute(false);
       setIsFreshersRoute(false);
 
       // Otherwise show recruitment teaser popup on home page load
@@ -48,6 +59,7 @@ function App() {
 
     const handlePopState = () => {
       const path = window.location.pathname.replace(/\/+$/, '') || '/';
+      setIsPassesAdminRoute(path === '/admin/passes');
       setIsAdminRoute(path === '/admin');
       setIsFreshersRoute(path === '/freshers-pass' || path === '/freshers');
     };
@@ -55,6 +67,11 @@ function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // If on passes admin route, render PassesAdminDashboard directly
+  if (isPassesAdminRoute) {
+    return <PassesAdminDashboard />;
+  }
 
   // If on admin route, render Admin Dashboard directly
   if (isAdminRoute) {

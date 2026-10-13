@@ -160,11 +160,22 @@ export default function AdminDashboard() {
             <button
               onClick={fetchApplications}
               disabled={isLoading}
-              className="px-4 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 rounded-xl text-xs font-mono uppercase tracking-wider flex items-center gap-2 transition-colors"
+              className="px-4 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 rounded-xl text-xs font-mono uppercase tracking-wider flex items-center gap-2 transition-colors cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
               <span>{isLoading ? 'Syncing...' : 'Refresh Data'}</span>
             </button>
+            <a
+              href="/admin/passes"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState({}, '', '/admin/passes');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="px-4 py-2.5 bg-zinc-900 border border-amber-500/40 hover:border-amber-400 text-amber-400 rounded-xl text-xs font-mono uppercase tracking-wider flex items-center gap-2 transition-colors"
+            >
+              <span>🎟️ Passes Console</span>
+            </a>
             <a
               href="/"
               onClick={(e) => {

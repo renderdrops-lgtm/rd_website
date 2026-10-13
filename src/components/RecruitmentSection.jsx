@@ -172,7 +172,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose, o
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                         EXCLUSIVE NIGHT 🎟️
                       </span>
-                      <span className="text-xs text-amber-400 font-black font-mono">FROM ₹359</span>
+                      <span className="text-xs text-amber-400 font-black font-mono">FROM ₹399</span>
                     </div>
 
                     <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white mb-2 leading-snug">
@@ -186,7 +186,7 @@ export default function RecruitmentSection({ isOpen, mode = 'teaser', onClose, o
                     <div className="space-y-1.5 mb-6 bg-zinc-950/70 border border-zinc-800 rounded-xl p-3 text-xs">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                        <span className="font-semibold text-white">November 7, 2026</span>
+                        <span className="font-semibold text-white">November 7th</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
