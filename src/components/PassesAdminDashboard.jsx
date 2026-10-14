@@ -178,7 +178,8 @@ export default function PassesAdminDashboard() {
 
   // Filtered tickets based on search and filters
   const filteredTickets = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
+    // Normalize: trim and collapse internal whitespace
+    const query = searchQuery.trim().replace(/\s+/g, ' ').toLowerCase();
 
     return tickets.filter(t => {
       // Tier filter
@@ -195,7 +196,15 @@ export default function PassesAdminDashboard() {
 
       if (!query) return true;
 
-      // Group member names & phones search
+      // Helper: check if query matches end (last N digits) of a field string
+      const endsWithQuery = (field) => {
+        const clean = (field || '').replace(/\s+/g, '').toLowerCase();
+        const q = query.replace(/\s+/g, '');
+        if (q.length < 4) return false; // Only activate suffix match for 4+ char queries
+        return clean.endsWith(q);
+      };
+
+      // Build flattened member search string (names + phones)
       let membersStr = '';
       if (Array.isArray(t.group_members)) {
         membersStr = t.group_members.map(m => `${m.name || ''} ${m.phone || ''}`).join(' ').toLowerCase();
@@ -203,15 +212,38 @@ export default function PassesAdminDashboard() {
         membersStr = t.group_members.toLowerCase();
       }
 
-      const matchSerial = (t.ticket_serial || t.serial_number || t.confirmation_id || '').toLowerCase().includes(query);
-      const matchBuyer = (t.buyer_name || t.name || '').toLowerCase().includes(query);
-      const matchEmail = (t.buyer_email || t.email || '').toLowerCase().includes(query);
-      const matchPhone = (t.buyer_phone || t.phone || '').toLowerCase().includes(query);
-      const matchPayment = (t.razorpay_payment_id || t.payment_id || '').toLowerCase().includes(query);
-      const matchPromo = promoFieldVal.toLowerCase().includes(query);
-      const matchMembers = membersStr.includes(query);
+      const serialVal  = t.ticket_serial || t.serial_number || t.confirmation_id || '';
+      const phoneVal   = t.buyer_phone || t.phone || '';
+      const paymentVal = t.razorpay_payment_id || t.payment_id || '';
+      const buyerVal   = t.buyer_name || t.name || '';
+      const emailVal   = t.buyer_email || t.email || '';
 
-      return matchSerial || matchBuyer || matchEmail || matchPhone || matchPayment || matchPromo || matchMembers;
+      // Standard partial includes matching
+      const matchBuyer   = buyerVal.toLowerCase().includes(query);
+      const matchEmail   = emailVal.toLowerCase().includes(query);
+      const matchPromo   = promoFieldVal.toLowerCase().includes(query);
+      const matchMembers = membersStr.includes(query);
+      const matchSerial  = serialVal.toLowerCase().includes(query);
+      const matchPhone   = phoneVal.toLowerCase().includes(query);
+      const matchPayment = paymentVal.toLowerCase().includes(query);
+
+      // Last-4 / last-6 digit suffix matching for numeric-style fields
+      const matchSerialSuffix  = endsWithQuery(serialVal);
+      const matchPhoneSuffix   = endsWithQuery(phoneVal);
+      const matchPaymentSuffix = endsWithQuery(paymentVal);
+
+      // Also match against individual group member phones via suffix
+      let matchMemberPhoneSuffix = false;
+      if (Array.isArray(t.group_members)) {
+        matchMemberPhoneSuffix = t.group_members.some(m => endsWithQuery(m.phone || ''));
+      }
+
+      return (
+        matchBuyer || matchEmail || matchPromo || matchMembers ||
+        matchSerial || matchPhone || matchPayment ||
+        matchSerialSuffix || matchPhoneSuffix || matchPaymentSuffix ||
+        matchMemberPhoneSuffix
+      );
     });
   }, [tickets, searchQuery, selectedTierFilter, selectedPromoFilter]);
 

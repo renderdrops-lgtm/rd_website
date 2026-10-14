@@ -117,10 +117,10 @@ const PRICING_TIERS = [
     discountedPrice: 799,
     admits: 2,
     perPerson: '₹450 / person',
-    description: 'One pass valid for two attendees for a shared night out experience.',
+    description: 'One pass valid for two attendees for a shared experience.',
     perks: [
       'Entry for Two Attendees',
-      'A Shared Night Out Experience',
+      'A Shared Experience',
       'Couple Photos & Memorable Moments',
       'Music, Entertainment & Celebrations'
     ]
