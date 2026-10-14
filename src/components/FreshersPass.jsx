@@ -227,7 +227,7 @@ export default function FreshersPass({ onBackToHome }) {
   useEffect(() => {
     const serial = confirmedTicket?.ticket_serial || confirmedTicket?.serial_number;
     if (serial) {
-      const verifyUrl = `${window.location.origin}/admin/passes?serial=${encodeURIComponent(serial)}`;
+      const verifyUrl = `https://renderdrops.in/?serial=${encodeURIComponent(serial)}`;
       QRCode.toDataURL(verifyUrl, {
         width: 320,
         margin: 1,
@@ -393,6 +393,7 @@ export default function FreshersPass({ onBackToHome }) {
       pass_type: selectedTier.title,
       amount: finalPrice,
       promo_discount: currentDiscount,
+      promo_code_used: isPromoApplied ? appliedPromo : '',
       group_members: finalGuestList,
       ticket_serial: clientTicketSerial
     };
@@ -723,15 +724,19 @@ export default function FreshersPass({ onBackToHome }) {
 
               {/* OVERLAY 1: Top Golden Box -> Dynamically Display Exact Ticket Tier */}
               <div
-                className="absolute flex items-center justify-center text-center px-1"
+                className="absolute flex items-center justify-center text-center overflow-hidden"
                 style={{
                   left: '73.27%',
                   top: '22.53%',
                   width: '20.33%',
-                  height: '12.33%'
+                  height: '12.33%',
+                  padding: '1% 2%'
                 }}
               >
-                <span className="font-display font-black uppercase tracking-wider text-amber-950 text-[9px] xs:text-[11px] sm:text-xs md:text-sm lg:text-base leading-tight select-none drop-shadow-[0_1px_1px_rgba(255,255,255,0.3)]">
+                <span
+                  className="font-display font-black uppercase tracking-wider text-amber-950 leading-tight select-none drop-shadow-[0_1px_1px_rgba(255,255,255,0.3)] w-full text-center"
+                  style={{ fontSize: 'clamp(7px, 1.4vw, 18px)' }}
+                >
                   {confirmedTicket.pass_type}
                 </span>
               </div>

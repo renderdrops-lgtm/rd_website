@@ -121,7 +121,7 @@ export default function PassesAdminDashboard() {
 
   // Compute live analytics
   const analytics = useMemo(() => {
-    const totalRev = tickets.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+    const totalRev = tickets.reduce((sum, t) => sum + (Number(t.amount_paid) || Number(t.amount) || 0), 0);
     const totalAdmit = tickets.reduce((sum, t) => sum + (Number(t.quantity) || 1), 0);
     
     // Promo codes aggregation & analytics
@@ -131,19 +131,20 @@ export default function PassesAdminDashboard() {
     });
 
     tickets.forEach(t => {
-      if (t.promo_code) {
-        const code = String(t.promo_code).trim().toUpperCase();
+      const promoField = t.promo_code_used || t.promo_code;
+      if (promoField) {
+        const code = String(promoField).trim().toUpperCase();
         if (!promoBreakdown[code]) {
           promoBreakdown[code] = { count: 0, discount: 0, revenue: 0 };
         }
         promoBreakdown[code].count += 1;
-        promoBreakdown[code].discount += (Number(t.promo_discount) || Number(t.discount_amount) || 0);
-        promoBreakdown[code].revenue += (Number(t.amount) || 0);
+        promoBreakdown[code].discount += (Number(t.discount_applied) || Number(t.promo_discount) || Number(t.discount_amount) || 0);
+        promoBreakdown[code].revenue += (Number(t.amount_paid) || Number(t.amount) || 0);
       }
     });
 
-    const totalPromoUsed = tickets.filter(t => t.promo_code).length;
-    const totalDiscountSaved = tickets.reduce((sum, t) => sum + (Number(t.promo_discount) || Number(t.discount_amount) || 0), 0);
+    const totalPromoUsed = tickets.filter(t => t.promo_code_used || t.promo_code).length;
+    const totalDiscountSaved = tickets.reduce((sum, t) => sum + (Number(t.discount_applied) || Number(t.promo_discount) || Number(t.discount_amount) || 0), 0);
 
     // Exact Tier breakdown: Early Bird, Stag Entry, Couple Pass, Group of 5, Group of 10
     const tiers = {
@@ -161,7 +162,7 @@ export default function PassesAdminDashboard() {
       }
       tiers[type].count += 1;
       tiers[type].admits += (Number(t.quantity) || 1);
-      tiers[type].revenue += (Number(t.amount) || 0);
+      tiers[type].revenue += (Number(t.amount_paid) || Number(t.amount) || 0);
     });
 
     return {
@@ -185,10 +186,11 @@ export default function PassesAdminDashboard() {
         return false;
       }
       // Promo filter
-      if (selectedPromoFilter === 'WITH_PROMO' && !t.promo_code) return false;
-      if (selectedPromoFilter === 'NO_PROMO' && t.promo_code) return false;
+      const promoFieldVal = t.promo_code_used || t.promo_code || '';
+      if (selectedPromoFilter === 'WITH_PROMO' && !promoFieldVal) return false;
+      if (selectedPromoFilter === 'NO_PROMO' && promoFieldVal) return false;
       if (selectedPromoFilter !== 'ALL' && selectedPromoFilter !== 'WITH_PROMO' && selectedPromoFilter !== 'NO_PROMO') {
-        if ((t.promo_code || '').trim().toUpperCase() !== selectedPromoFilter) return false;
+        if (promoFieldVal.trim().toUpperCase() !== selectedPromoFilter) return false;
       }
 
       if (!query) return true;
@@ -206,7 +208,7 @@ export default function PassesAdminDashboard() {
       const matchEmail = (t.buyer_email || t.email || '').toLowerCase().includes(query);
       const matchPhone = (t.buyer_phone || t.phone || '').toLowerCase().includes(query);
       const matchPayment = (t.razorpay_payment_id || t.payment_id || '').toLowerCase().includes(query);
-      const matchPromo = (t.promo_code || '').toLowerCase().includes(query);
+      const matchPromo = promoFieldVal.toLowerCase().includes(query);
       const matchMembers = membersStr.includes(query);
 
       return matchSerial || matchBuyer || matchEmail || matchPhone || matchPayment || matchPromo || matchMembers;
@@ -254,8 +256,8 @@ export default function PassesAdminDashboard() {
         `"${t.buyer_email || t.email || ''}"`,
         `"${t.pass_type || ''}"`,
         `"${t.quantity || 1}"`,
-        `"${t.amount || 0}"`,
-        `"${t.promo_code || 'None'}"`,
+        `"${t.amount_paid || t.amount || 0}"`,
+        `"${t.promo_code_used || t.promo_code || 'None'}"`,
         `"${t.razorpay_payment_id || t.payment_id || ''}"`,
         `"${members.replace(/"/g, '""')}"`,
         `"${checkedInIds.has(serial) ? 'YES' : 'NO'}"`,
@@ -503,7 +505,7 @@ export default function PassesAdminDashboard() {
                       {doorQuickMatch.buyer_name || doorQuickMatch.name} • {doorQuickMatch.pass_type} (Admits {doorQuickMatch.quantity || 1})
                     </p>
                     <p className="text-xs text-zinc-400 font-mono">
-                      Phone: {doorQuickMatch.buyer_phone || doorQuickMatch.phone} | Paid: ₹{doorQuickMatch.amount}
+                      Phone: {doorQuickMatch.buyer_phone || doorQuickMatch.phone} | Paid: ₹{doorQuickMatch.amount_paid || doorQuickMatch.amount || 0}
                     </p>
                   </div>
 
@@ -825,17 +827,17 @@ export default function PassesAdminDashboard() {
 
                       {/* Amount Paid */}
                       <td className="py-3 px-3 whitespace-nowrap">
-                        <div className="text-emerald-400 font-bold text-sm">₹{t.amount}</div>
-                        {t.original_amount && Number(t.original_amount) > Number(t.amount) && (
+                        <div className="text-emerald-400 font-bold text-sm">₹{t.amount_paid || t.amount || 0}</div>
+                        {t.original_amount && Number(t.original_amount) > (Number(t.amount_paid) || Number(t.amount) || 0) && (
                           <div className="text-zinc-500 text-[10px] line-through">₹{t.original_amount}</div>
                         )}
                       </td>
 
                       {/* Promo Code */}
                       <td className="py-3 px-3 whitespace-nowrap">
-                        {t.promo_code ? (
+                        {(t.promo_code_used || t.promo_code) ? (
                           <span className="bg-emerald-950/60 border border-emerald-600/40 text-emerald-400 px-2 py-0.5 rounded text-[10px] font-bold">
-                            {t.promo_code} (-₹{t.promo_discount || t.discount_amount || 0})
+                            {t.promo_code_used || t.promo_code} (-₹{t.discount_applied || t.promo_discount || t.discount_amount || 0})
                           </span>
                         ) : (
                           <span className="text-zinc-600 text-[10px]">—</span>

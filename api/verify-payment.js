@@ -33,6 +33,7 @@ export default async function handler(req, res) {
       pass_type,
       amount,
       promo_discount,
+      promo_code_used,
       group_members,
       ticket_serial
     } = req.body || {};
@@ -102,6 +103,7 @@ export default async function handler(req, res) {
     const cleanPassType = pass_type || 'Freshers Pass';
     const numAmount = Number(amount) || 0;
     const numPromoDiscount = Number(promo_discount) || 0;
+    const cleanPromoCodeUsed = (promo_code_used || '').trim().toUpperCase() || null;
     const cleanGroupMembers = Array.isArray(group_members) ? group_members : [];
 
     // 4. Supabase Database Logging (RLS Bypass via Service Role Key if configured)
@@ -122,6 +124,7 @@ export default async function handler(req, res) {
         pass_type: cleanPassType,
         amount_paid: numAmount,
         discount_applied: numPromoDiscount,
+        promo_code_used: cleanPromoCodeUsed,
         razorpay_payment_id: razorpay_payment_id || '',
         razorpay_order_id: razorpay_order_id || '',
         razorpay_signature: razorpay_signature || '',
