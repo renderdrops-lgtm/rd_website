@@ -6,6 +6,7 @@
 CREATE TABLE IF NOT EXISTS public.tickets (
   id BIGSERIAL PRIMARY KEY,
   serial_number TEXT UNIQUE NOT NULL,
+  ticket_serial TEXT,
   buyer_name TEXT NOT NULL,
   buyer_email TEXT NOT NULL,
   buyer_phone TEXT NOT NULL,
@@ -14,9 +15,13 @@ CREATE TABLE IF NOT EXISTS public.tickets (
   amount NUMERIC NOT NULL,
   original_amount NUMERIC,
   discount_amount NUMERIC DEFAULT 0,
+  promo_discount NUMERIC DEFAULT 0,
   promo_code TEXT,
   payment_id TEXT,
   order_id TEXT,
+  razorpay_payment_id TEXT,
+  razorpay_order_id TEXT,
+  razorpay_signature TEXT,
   group_members JSONB DEFAULT '[]'::jsonb,
   event_date TEXT DEFAULT 'November 7th',
   venue TEXT DEFAULT 'Finn – The Luxury Club',
@@ -29,6 +34,14 @@ CREATE TABLE IF NOT EXISTS public.tickets (
   phone TEXT,
   confirmation_id TEXT
 );
+
+-- Add verification fields when upgrading an existing tickets table.
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS ticket_serial TEXT;
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS promo_discount NUMERIC DEFAULT 0;
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS razorpay_payment_id TEXT;
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS razorpay_order_id TEXT;
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS razorpay_signature TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_tickets_ticket_serial ON public.tickets(ticket_serial);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.tickets ENABLE ROW LEVEL SECURITY;

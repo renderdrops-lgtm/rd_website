@@ -328,9 +328,12 @@ export default function FreshersPass({ onBackToHome }) {
   };
 
   // Complete ticket fulfillment logic (Supabase backend ONLY - no local storage!)
-  const fulfillTicket = async (paymentId, orderId = null) => {
-    const serialNumber = generateSerialNumber();
-
+  const fulfillTicket = async (
+    paymentId,
+    orderId = null,
+    serialNumber = generateSerialNumber(),
+    persistToSupabase = true
+  ) => {
     // Prepare complete guest list
     const finalGuestList = (selectedTier.admits > 1)
       ? groupMembers.map((m, idx) => ({
@@ -370,14 +373,16 @@ export default function FreshersPass({ onBackToHome }) {
       created_at: new Date().toISOString()
     };
 
-    // Store securely directly in Supabase tickets table (no local storage!)
-    try {
-      const { error } = await supabase.from('tickets').insert([ticketRecord]);
-      if (error) {
-        console.warn('Note on Supabase tickets table insert:', error.message);
+    // Mock payments still use the client insert; live payments are persisted by verify-payment.
+    if (persistToSupabase) {
+      try {
+        const { error } = await supabase.from('tickets').insert([ticketRecord]);
+        if (error) {
+          console.error('Supabase ticket insert failed:', error.message);
+        }
+      } catch (dbErr) {
+        console.error('Supabase ticket insert failed:', dbErr);
       }
-    } catch (dbErr) {
-      console.warn('Supabase insert note:', dbErr);
     }
 
     // Display the digital pass view
@@ -409,6 +414,7 @@ export default function FreshersPass({ onBackToHome }) {
 
     const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder';
     const amountInPaise = Math.round(finalPrice * 100);
+    const ticketSerial = generateSerialNumber();
 
     // 2. Call Vercel serverless order creation endpoint
     let serverOrderId = null;
@@ -471,23 +477,44 @@ export default function FreshersPass({ onBackToHome }) {
       order_id: serverOrderId || undefined,
       handler: async function (response) {
         if (response.razorpay_payment_id) {
-          // Verify signature via serverless endpoint if present
-          if (response.razorpay_signature && serverOrderId) {
-            try {
-              await fetch('/api/verify-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id || serverOrderId,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature
-                })
-              });
-            } catch (vErr) {
-              console.warn('Payment verification endpoint warning:', vErr);
+          const orderId = response.razorpay_order_id || serverOrderId;
+          try {
+            const verifyRes = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: orderId,
+                razorpay_signature: response.razorpay_signature,
+                buyer_name: formData.name.trim(),
+                buyer_email: formData.email.trim().toLowerCase(),
+                buyer_phone: formData.phone.trim(),
+                pass_type: selectedTier.title,
+                amount: finalPrice,
+                promo_discount: currentDiscount,
+                promo_code: isPromoApplied ? appliedPromo : null,
+                group_members: selectedTier.admits > 1 ? groupMembers : [],
+                ticket_serial: ticketSerial
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok || !verifyData.success || !verifyData.serial_number) {
+              throw new Error(verifyData.error || 'Payment verification or ticket creation failed.');
             }
+
+            await fulfillTicket(
+              response.razorpay_payment_id,
+              orderId,
+              verifyData.serial_number,
+              false
+            );
+          } catch (verificationError) {
+            console.error('Payment verification or ticket creation failed:', verificationError);
+            setPaymentError(
+              `Payment succeeded, but ticket creation failed. Please contact support with payment ID ${response.razorpay_payment_id}.`
+            );
+            setIsProcessing(false);
           }
-          await fulfillTicket(response.razorpay_payment_id, response.razorpay_order_id || serverOrderId);
         } else {
           setPaymentError('Payment completed but verification ID is missing.');
           setIsProcessing(false);
