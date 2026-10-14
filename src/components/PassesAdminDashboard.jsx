@@ -137,13 +137,13 @@ export default function PassesAdminDashboard() {
           promoBreakdown[code] = { count: 0, discount: 0, revenue: 0 };
         }
         promoBreakdown[code].count += 1;
-        promoBreakdown[code].discount += (Number(t.discount_amount) || 0);
+        promoBreakdown[code].discount += (Number(t.promo_discount) || Number(t.discount_amount) || 0);
         promoBreakdown[code].revenue += (Number(t.amount) || 0);
       }
     });
 
     const totalPromoUsed = tickets.filter(t => t.promo_code).length;
-    const totalDiscountSaved = tickets.reduce((sum, t) => sum + (Number(t.discount_amount) || 0), 0);
+    const totalDiscountSaved = tickets.reduce((sum, t) => sum + (Number(t.promo_discount) || Number(t.discount_amount) || 0), 0);
 
     // Exact Tier breakdown: Early Bird, Stag Entry, Couple Pass, Group of 5, Group of 10
     const tiers = {
@@ -201,11 +201,11 @@ export default function PassesAdminDashboard() {
         membersStr = t.group_members.toLowerCase();
       }
 
-      const matchSerial = (t.serial_number || t.confirmation_id || '').toLowerCase().includes(query);
+      const matchSerial = (t.ticket_serial || t.serial_number || t.confirmation_id || '').toLowerCase().includes(query);
       const matchBuyer = (t.buyer_name || t.name || '').toLowerCase().includes(query);
       const matchEmail = (t.buyer_email || t.email || '').toLowerCase().includes(query);
       const matchPhone = (t.buyer_phone || t.phone || '').toLowerCase().includes(query);
-      const matchPayment = (t.payment_id || '').toLowerCase().includes(query);
+      const matchPayment = (t.razorpay_payment_id || t.payment_id || '').toLowerCase().includes(query);
       const matchPromo = (t.promo_code || '').toLowerCase().includes(query);
       const matchMembers = membersStr.includes(query);
 
@@ -218,7 +218,7 @@ export default function PassesAdminDashboard() {
     if (!doorCheckSearch.trim()) return null;
     const q = doorCheckSearch.trim().toLowerCase();
     return tickets.find(t => 
-      (t.serial_number || '').toLowerCase() === q ||
+      (t.ticket_serial || t.serial_number || '').toLowerCase() === q ||
       (t.buyer_phone || t.phone || '').replace(/[^0-9]/g, '') === q.replace(/[^0-9]/g, '')
     );
   }, [tickets, doorCheckSearch]);
@@ -246,8 +246,9 @@ export default function PassesAdminDashboard() {
       if (Array.isArray(t.group_members)) {
         members = t.group_members.map((m, i) => `G${i+1}: ${m.name} (${m.phone})`).join(' | ');
       }
+      const serial = t.ticket_serial || t.serial_number || t.confirmation_id || '';
       return [
-        `"${t.serial_number || t.confirmation_id || ''}"`,
+        `"${serial}"`,
         `"${t.buyer_name || t.name || ''}"`,
         `"${t.buyer_phone || t.phone || ''}"`,
         `"${t.buyer_email || t.email || ''}"`,
@@ -255,9 +256,9 @@ export default function PassesAdminDashboard() {
         `"${t.quantity || 1}"`,
         `"${t.amount || 0}"`,
         `"${t.promo_code || 'None'}"`,
-        `"${t.payment_id || ''}"`,
+        `"${t.razorpay_payment_id || t.payment_id || ''}"`,
         `"${members.replace(/"/g, '""')}"`,
-        `"${checkedInIds.has(t.serial_number) ? 'YES' : 'NO'}"`,
+        `"${checkedInIds.has(serial) ? 'YES' : 'NO'}"`,
         `"${t.created_at || ''}"`
       ].join(',');
     });
@@ -772,7 +773,7 @@ export default function PassesAdminDashboard() {
               </thead>
               <tbody className="divide-y divide-zinc-800/60">
                 {filteredTickets.map((t) => {
-                  const serial = t.serial_number || t.confirmation_id || `RD-${t.id}`;
+                  const serial = t.ticket_serial || t.serial_number || t.confirmation_id || `RD-${t.id}`;
                   const isCheckedIn = checkedInIds.has(serial);
                   const members = Array.isArray(t.group_members) ? t.group_members : [];
 
@@ -834,7 +835,7 @@ export default function PassesAdminDashboard() {
                       <td className="py-3 px-3 whitespace-nowrap">
                         {t.promo_code ? (
                           <span className="bg-emerald-950/60 border border-emerald-600/40 text-emerald-400 px-2 py-0.5 rounded text-[10px] font-bold">
-                            {t.promo_code} (-₹{t.discount_amount || 0})
+                            {t.promo_code} (-₹{t.promo_discount || t.discount_amount || 0})
                           </span>
                         ) : (
                           <span className="text-zinc-600 text-[10px]">—</span>
@@ -863,7 +864,7 @@ export default function PassesAdminDashboard() {
 
                       {/* Payment ID */}
                       <td className="py-3 px-3 whitespace-nowrap text-zinc-400 text-[10px]">
-                        <span className="select-all">{t.payment_id || 'N/A'}</span>
+                        <span className="select-all">{t.razorpay_payment_id || t.payment_id || 'N/A'}</span>
                         <div className="text-zinc-600 text-[9px]">
                           {t.created_at ? new Date(t.created_at).toLocaleDateString() : 'Recent'}
                         </div>
@@ -928,7 +929,7 @@ export default function PassesAdminDashboard() {
                 {inspectTicket.pass_type}
               </h3>
               <p className="font-mono text-xs text-amber-400 font-bold mt-1">
-                Serial: {inspectTicket.serial_number || inspectTicket.confirmation_id}
+                Serial: {inspectTicket.ticket_serial || inspectTicket.serial_number || inspectTicket.confirmation_id}
               </p>
             </div>
 

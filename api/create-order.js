@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     }
 
     const keyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.VITE_RAZORPAY_KEY_SECRET;
 
     // Graceful mock fallback if keys are missing or placeholders (for test/staging)
     if (!keyId || !keySecret || keyId === 'rzp_test_placeholder' || keySecret === 'rzp_secret_placeholder') {

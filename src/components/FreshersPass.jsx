@@ -24,6 +24,8 @@ import {
   User,
   ExternalLink
 } from 'lucide-react';
+import QRCode from 'qrcode';
+import html2canvas from 'html2canvas';
 import { supabase } from '../lib/supabase';
 import CustomCursor from './CustomCursor';
 import logoImg from '../assets/logo.png';
@@ -55,7 +57,10 @@ const PARTNER_LOGOS = [
 // Official Event Poster from Supabase Storage
 const SUPABASE_POSTER_STORAGE_URL = "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/official%20poster%20%20(1).webp";
 
-// Official Promo Codes Specification (Eligible promo codes give ₹100 OFF)
+// Official Ticket Background Skin URL for Digital Pass
+const TICKET_BG_SKIN_URL = "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/Velvet%20Vault%20Freshers%20Party%20Pass.webp";
+
+// Active Promo Codes Specification (Variable Tier Savings)
 const VALID_PROMO_CODES = [
   'VELVET-VIBE',
   'GOLDENHOUR',
@@ -64,7 +69,7 @@ const VALID_PROMO_CODES = [
   'TXJAS.AFTDARK7'
 ];
 
-// Exact Pricing Tiers with Promo Discounts
+// Exact Pricing Tiers with Variable Tier-Specific Promo Discounts
 const PRICING_TIERS = [
   {
     id: 'early-bird',
@@ -72,8 +77,8 @@ const PRICING_TIERS = [
     badge: 'LIMITED ALLOCATION',
     badgeColor: 'amber',
     price: 399,
-    promoDiscount: 100,
-    discountedPrice: 299,
+    promoDiscount: 50,
+    discountedPrice: 349,
     admits: 1,
     perPerson: '₹399 / person',
     description: 'Special launch pricing available for the first 150 tickets.',
@@ -90,8 +95,8 @@ const PRICING_TIERS = [
     badge: 'POPULAR',
     badgeColor: 'zinc',
     price: 499,
-    promoDiscount: 100,
-    discountedPrice: 399,
+    promoDiscount: 50,
+    discountedPrice: 449,
     admits: 1,
     perPerson: '₹499 / person',
     description: 'Single-person party pass for the full Freshers celebration.',
@@ -126,8 +131,8 @@ const PRICING_TIERS = [
     badge: 'CREW SAVINGS',
     badgeColor: 'amber',
     price: 2550,
-    promoDiscount: 100,
-    discountedPrice: 2450,
+    promoDiscount: 200,
+    discountedPrice: 2350,
     admits: 5,
     perPerson: '₹510 / person',
     description: 'One squad pass for 5 friends to celebrate together and create shared memories.',
@@ -144,8 +149,8 @@ const PRICING_TIERS = [
     badge: 'VIP CREW',
     badgeColor: 'amber',
     price: 4950,
-    promoDiscount: 100,
-    discountedPrice: 4850,
+    promoDiscount: 450,
+    discountedPrice: 4500,
     admits: 10,
     perPerson: '₹495 / person',
     description: 'One pass for your entire crew of 10 for an unforgettable celebration.',
@@ -174,12 +179,20 @@ const loadRazorpayScript = () => {
   });
 };
 
-// Generate unique serial number formatted as RD-PASS-2026-XXXXXX
+// Generate cryptographically secure unique serial number formatted as RD-PASS-2026-XXXXXX
 const generateSerialNumber = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let rand = '';
-  for (let i = 0; i < 6; i++) {
-    rand += chars.charAt(Math.floor(Math.random() * chars.length));
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+    const bytes = new Uint8Array(6);
+    window.crypto.getRandomValues(bytes);
+    for (let i = 0; i < 6; i++) {
+      rand += chars.charAt(bytes[i] % chars.length);
+    }
+  } else {
+    for (let i = 0; i < 6; i++) {
+      rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
   }
   return `RD-PASS-2026-${rand}`;
 };
@@ -200,6 +213,8 @@ export default function FreshersPass({ onBackToHome }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
   const [confirmedTicket, setConfirmedTicket] = useState(null);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+  const [isGeneratingDownload, setIsGeneratingDownload] = useState(false);
   const [posterLoaded, setPosterLoaded] = useState(false);
   const [posterError, setPosterError] = useState(false);
 
@@ -207,6 +222,26 @@ export default function FreshersPass({ onBackToHome }) {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Generate crisp live scannable QR Code whenever confirmedTicket is created
+  useEffect(() => {
+    const serial = confirmedTicket?.ticket_serial || confirmedTicket?.serial_number;
+    if (serial) {
+      const verifyUrl = `${window.location.origin}/admin/passes?serial=${encodeURIComponent(serial)}`;
+      QRCode.toDataURL(verifyUrl, {
+        width: 320,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      }).then(url => {
+        setQrCodeDataUrl(url);
+      }).catch(err => {
+        console.error('Failed to generate QR Code:', err);
+      });
+    }
+  }, [confirmedTicket]);
 
   // Update group members array whenever selectedTier changes
   useEffect(() => {
@@ -327,11 +362,12 @@ export default function FreshersPass({ onBackToHome }) {
     return errs;
   };
 
-  // Complete ticket fulfillment logic (Supabase backend ONLY - no local storage!)
-  const fulfillTicket = async (paymentId, orderId = null) => {
-    const serialNumber = generateSerialNumber();
+  // Complete verification & ticket fulfillment via /api/verify-payment
+  const verifyAndFulfill = async (paymentResponse, fallbackOrderId = null) => {
+    setIsProcessing(true);
+    setPaymentError(null);
 
-    // Prepare complete guest list
+    const clientTicketSerial = generateSerialNumber();
     const finalGuestList = (selectedTier.admits > 1)
       ? groupMembers.map((m, idx) => ({
           guest_number: idx + 1,
@@ -346,43 +382,78 @@ export default function FreshersPass({ onBackToHome }) {
           }
         ];
 
-    const ticketRecord = {
-      serial_number: serialNumber,
-      confirmation_id: serialNumber,
+    // Strict payload specification required for server verification & Supabase logging
+    const payload = {
+      razorpay_payment_id: paymentResponse.razorpay_payment_id,
+      razorpay_order_id: paymentResponse.razorpay_order_id || fallbackOrderId || '',
+      razorpay_signature: paymentResponse.razorpay_signature || '',
       buyer_name: formData.name.trim(),
-      name: formData.name.trim(),
       buyer_email: formData.email.trim().toLowerCase(),
-      email: formData.email.trim().toLowerCase(),
       buyer_phone: formData.phone.trim(),
-      phone: formData.phone.trim(),
       pass_type: selectedTier.title,
-      quantity: selectedTier.admits,
-      original_amount: selectedTier.price,
       amount: finalPrice,
-      discount_amount: currentDiscount,
-      promo_code: isPromoApplied ? appliedPromo : null,
-      payment_id: paymentId,
-      order_id: orderId,
+      promo_discount: currentDiscount,
       group_members: finalGuestList,
-      event_date: 'November 7th',
-      venue: 'Finn – The Luxury Club',
-      status: 'confirmed',
-      created_at: new Date().toISOString()
+      ticket_serial: clientTicketSerial
     };
 
-    // Store securely directly in Supabase tickets table (no local storage!)
     try {
-      const { error } = await supabase.from('tickets').insert([ticketRecord]);
-      if (error) {
-        console.warn('Note on Supabase tickets table insert:', error.message);
-      }
-    } catch (dbErr) {
-      console.warn('Supabase insert note:', dbErr);
-    }
+      const verifyRes = await fetch('/api/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-    // Display the digital pass view
-    setConfirmedTicket(ticketRecord);
-    setIsProcessing(false);
+      const verifyData = await verifyRes.json();
+
+      if (!verifyRes.ok || !verifyData.success) {
+        const errorMsg = verifyData.error || `Payment verification failed (HTTP ${verifyRes.status})`;
+        console.error('Payment verification failed:', errorMsg, verifyData);
+        setPaymentError(errorMsg);
+        setIsProcessing(false);
+        return;
+      }
+
+      // Confirmed ticket serial number validated by server
+      const confirmedSerial = verifyData.serial_number || clientTicketSerial;
+
+      const confirmedRecord = {
+        ...payload,
+        ticket_serial: confirmedSerial,
+        serial_number: confirmedSerial,
+        confirmation_id: confirmedSerial,
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.trim(),
+        quantity: selectedTier.admits,
+        original_amount: selectedTier.price,
+        discount_amount: currentDiscount,
+        promo_code: isPromoApplied ? appliedPromo : null,
+        payment_id: paymentResponse.razorpay_payment_id,
+        order_id: paymentResponse.razorpay_order_id || fallbackOrderId,
+        event_date: 'November 7th',
+        venue: 'Finn – The Luxury Club',
+        status: 'confirmed',
+        created_at: new Date().toISOString()
+      };
+
+      // Client-side Supabase write insurance in case server was in dev mode or RLS bypassed
+      try {
+        await supabase.from('tickets').insert([confirmedRecord]);
+      } catch (clientDbErr) {
+        console.warn('Client-side Supabase write insurance note:', clientDbErr);
+      }
+
+      setConfirmedTicket(confirmedRecord);
+      setIsProcessing(false);
+    } catch (err) {
+      console.error('Payment verification request failed:', err);
+      setPaymentError(
+        'Network error during payment verification: ' +
+        (err.message || 'Please contact organizers with payment ID: ' + paymentResponse.razorpay_payment_id)
+      );
+      setIsProcessing(false);
+    }
   };
 
   const handleCheckout = async (e) => {
@@ -447,10 +518,13 @@ export default function FreshersPass({ onBackToHome }) {
       );
 
       if (confirmSim) {
-        setTimeout(async () => {
-          const mockPaymentId = `pay_mock_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-          await fulfillTicket(mockPaymentId, serverOrderId || `order_mock_${Date.now()}`);
-        }, 1000);
+        const mockPaymentId = `pay_mock_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        const mockOrderId = serverOrderId || `order_mock_${Date.now()}`;
+        await verifyAndFulfill({
+          razorpay_payment_id: mockPaymentId,
+          razorpay_order_id: mockOrderId,
+          razorpay_signature: 'mock_signature'
+        }, mockOrderId);
         return;
       } else {
         setIsProcessing(false);
@@ -469,28 +543,14 @@ export default function FreshersPass({ onBackToHome }) {
       image: 'https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/rd.webp',
       order_id: serverOrderId || undefined,
       handler: async function (response) {
-        if (response.razorpay_payment_id) {
-          // Verify signature via serverless endpoint if present
-          if (response.razorpay_signature && serverOrderId) {
-            try {
-              await fetch('/api/verify-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id || serverOrderId,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature
-                })
-              });
-            } catch (vErr) {
-              console.warn('Payment verification endpoint warning:', vErr);
-            }
-          }
-          await fulfillTicket(response.razorpay_payment_id, response.razorpay_order_id || serverOrderId);
-        } else {
+        if (!response.razorpay_payment_id) {
           setPaymentError('Payment completed but verification ID is missing.');
           setIsProcessing(false);
+          return;
         }
+
+        // Asynchronously verify signature and fulfill pass via /api/verify-payment
+        await verifyAndFulfill(response, serverOrderId);
       },
       prefill: {
         name: formData.name,
@@ -529,6 +589,78 @@ export default function FreshersPass({ onBackToHome }) {
     }
   };
 
+  // Download digital pass card using html2canvas targeting #digital-pass-card
+  const handleDownloadPass = async () => {
+    if (!confirmedTicket) return;
+    setIsGeneratingDownload(true);
+
+    const serial = confirmedTicket.ticket_serial || confirmedTicket.serial_number || '2026';
+    const filename = `Freshers_Pass_${serial}.png`;
+
+    try {
+      const cardElement = document.getElementById('digital-pass-card');
+      if (!cardElement) {
+        throw new Error('Digital pass card container (#digital-pass-card) not found');
+      }
+
+      // Target #digital-pass-card with html2canvas and explicit CORS configuration
+      const canvas = await html2canvas(cardElement, {
+        useCORS: true,
+        allowTaint: false,
+        scale: 2,
+        backgroundColor: null,
+        logging: false
+      });
+
+      // Mobile browser fallback: Web Share API if supported
+      const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+      if (isMobile && navigator.share && navigator.canShare) {
+        try {
+          const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+          if (blob) {
+            const file = new File([blob], filename, { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                title: 'RenderDrops Freshers Party Pass 2026',
+                text: `Official Entry Pass (${serial}) for Finn – The Luxury Club`,
+                files: [file]
+              });
+              setIsGeneratingDownload(false);
+              return;
+            }
+          }
+        } catch (shareErr) {
+          if (shareErr.name !== 'AbortError') {
+            console.warn('Mobile web share notice, proceeding with standard file download:', shareErr);
+          } else {
+            setIsGeneratingDownload(false);
+            return;
+          }
+        }
+      }
+
+      // Standard desktop & mobile direct PNG file download
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.warn('html2canvas pass download error, falling back to print dialog:', err);
+      // Clean fallback behavior for mobile and blocked canvas
+      window.print();
+    } finally {
+      setIsGeneratingDownload(false);
+    }
+  };
+
+  // Mobile-optimized share or save to photo gallery
+  const handleShareOrSave = async () => {
+    await handleDownloadPass();
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -542,223 +674,229 @@ export default function FreshersPass({ onBackToHome }) {
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 1. DIGITAL PASS SCREEN (On Successful Payment)
+  // 1. DIGITAL PASS SCREEN (Official Ticket Skin & Dynamic Overlay)
   // ─────────────────────────────────────────────────────────────────────────────
   if (confirmedTicket) {
     const attendees = Array.isArray(confirmedTicket.group_members) ? confirmedTicket.group_members : [];
 
     return (
-      <div className="min-h-screen bg-zinc-950 text-white py-12 px-4 sm:px-6 lg:px-8 relative selection:bg-amber-500 selection:text-black">
+      <div className="min-h-screen bg-zinc-950 text-white py-10 px-4 sm:px-6 lg:px-8 relative selection:bg-amber-500 selection:text-black">
         <CustomCursor />
 
         {/* Ambient luxury lighting */}
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-2xl h-[300px] bg-amber-500/10 blur-[140px] pointer-events-none rounded-full" />
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-xl h-[250px] bg-red-600/10 blur-[120px] pointer-events-none rounded-full" />
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[320px] bg-amber-500/10 blur-[150px] pointer-events-none rounded-full" />
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-2xl h-[280px] bg-red-600/10 blur-[130px] pointer-events-none rounded-full" />
 
-        <div className="max-w-2xl mx-auto relative z-10">
+        <div className="max-w-4xl mx-auto relative z-10 space-y-8">
           
-          {/* Header Action */}
-          <div className="flex items-center justify-between mb-8 print:hidden">
+          {/* Header Action Bar */}
+          <div className="flex items-center justify-between print:hidden">
             <button
               onClick={handleReturnHome}
-              className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-zinc-400 hover:text-white transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-zinc-400 hover:text-white transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Homepage</span>
+              <span>Back to Studio</span>
             </button>
-            <span className="text-[11px] font-mono uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-full flex items-center gap-1.5 font-bold">
+            <span className="text-[11px] font-mono uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>BOOKING CONFIRMED & VERIFIED</span>
             </span>
           </div>
 
-          {/* Ticket Card Container */}
+          {/* Official Pass Skin Container with Responsive Dynamic Overlays */}
           <div 
             id="digital-pass-card"
-            className="bg-zinc-900/95 border-2 border-amber-500/50 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_35px_rgba(245,158,11,0.2)] overflow-hidden relative backdrop-blur-xl"
+            className="relative w-full rounded-3xl overflow-hidden shadow-[0_30px_90px_rgba(0,0,0,0.95),0_0_40px_rgba(245,158,11,0.25)] border-2 border-amber-500/40 bg-zinc-950"
           >
-            {/* Holographic Header Bar */}
-            <div className="bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600 p-4 text-black flex items-center justify-between font-mono text-xs font-black tracking-widest uppercase">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                <span>OFFICIAL ADMIT PASS</span>
-              </div>
-              <span>RENDERDROPS EXCLUSIVE</span>
-            </div>
+            {/* Base Image Container maintaining 1672:941 aspect ratio */}
+            <div className="relative w-full aspect-[1672/941]">
+              <img
+                src={TICKET_BG_SKIN_URL}
+                alt="Velvet Vault Freshers Party Pass"
+                crossOrigin="anonymous"
+                className="w-full h-full object-cover block select-none pointer-events-none"
+              />
 
-            {/* Ticket Main Content */}
-            <div className="p-6 sm:p-8 space-y-6">
-              
-              {/* Event Name & Tag */}
-              <div className="text-center pb-6 border-b border-white/10">
-                <span className="text-[10px] font-mono tracking-[0.3em] uppercase text-amber-400 block mb-1">
-                  // FINN LUXURY CLUB PRESENTATION
+              {/* OVERLAY 1: Top Golden Box -> Dynamically Display Exact Ticket Tier */}
+              <div
+                className="absolute flex items-center justify-center text-center px-1"
+                style={{
+                  left: '73.27%',
+                  top: '22.53%',
+                  width: '20.33%',
+                  height: '12.33%'
+                }}
+              >
+                <span className="font-display font-black uppercase tracking-wider text-amber-950 text-[9px] xs:text-[11px] sm:text-xs md:text-sm lg:text-base leading-tight select-none drop-shadow-[0_1px_1px_rgba(255,255,255,0.3)]">
+                  {confirmedTicket.pass_type}
                 </span>
-                <h1 className="font-display text-4xl sm:text-5xl uppercase tracking-tight text-white leading-none">
-                  FRESHERS PARTY <span className="text-amber-400">2026</span>
-                </h1>
-                <p className="text-xs text-zinc-400 font-mono mt-2">
-                  BANGALORE'S PREMIER DAY PARTY EXPERIENCE
-                </p>
               </div>
 
-              {/* Event Quick Specs */}
-              <div className="grid grid-cols-2 gap-4 bg-zinc-950/70 p-4 rounded-2xl border border-white/5 font-mono text-xs">
-                <div>
-                  <span className="text-zinc-500 text-[10px] block mb-0.5">DATE & TIME</span>
-                  <span className="text-amber-300 font-bold flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" /> November 7th
-                  </span>
-                  <span className="text-zinc-400 text-[11px] block mt-0.5">1 PM onwards · Day Party</span>
-                </div>
-                <div>
-                  <span className="text-zinc-500 text-[10px] block mb-0.5">VENUE</span>
-                  <span className="text-white font-bold flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-red-500" /> Finn – The Luxury Club
-                  </span>
-                  <span className="text-zinc-400 text-[11px] block mt-0.5">Bangalore, Karnataka</span>
-                </div>
-              </div>
-
-              {/* Pass Tier & Attendee Information */}
-              <div className="space-y-3 font-mono text-xs">
-                <div className="flex justify-between items-center py-2 border-b border-white/5">
-                  <span className="text-zinc-400">Pass Category:</span>
-                  <span className="text-amber-400 font-bold uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded border border-amber-500/20">
-                    {confirmedTicket.pass_type} (Admits {confirmedTicket.quantity || 1})
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-white/5">
-                  <span className="text-zinc-400">Primary Buyer:</span>
-                  <span className="text-white font-bold">{confirmedTicket.buyer_name || confirmedTicket.name}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-white/5">
-                  <span className="text-zinc-400">Registered Phone:</span>
-                  <span className="text-zinc-200">+{confirmedTicket.buyer_phone || confirmedTicket.phone}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-white/5">
-                  <span className="text-zinc-400">Email Confirmation:</span>
-                  <span className="text-zinc-200">{confirmedTicket.buyer_email || confirmedTicket.email}</span>
-                </div>
-                
-                {confirmedTicket.promo_code && (
-                  <div className="flex justify-between items-center py-2 border-b border-white/5">
-                    <span className="text-zinc-400">Promo Code Applied:</span>
-                    <span className="text-emerald-400 font-bold">{confirmedTicket.promo_code} (-₹{confirmedTicket.discount_amount})</span>
+              {/* OVERLAY 2: Middle Large White Box -> Crisp, Live Scannable QR Code */}
+              <div
+                className="absolute flex items-center justify-center p-1 sm:p-2 md:p-3"
+                style={{
+                  left: '75.18%',
+                  top: '36.56%',
+                  width: '18.66%',
+                  height: '31.77%'
+                }}
+              >
+                {qrCodeDataUrl ? (
+                  <img
+                    src={qrCodeDataUrl}
+                    alt={`Verification QR Code for ${confirmedTicket.ticket_serial || confirmedTicket.serial_number}`}
+                    crossOrigin="anonymous"
+                    className="w-full h-full object-contain mix-blend-multiply"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-white/90 rounded">
+                    <QrCode className="w-3/4 h-3/4 text-black animate-pulse" />
                   </div>
                 )}
-
-                <div className="flex justify-between items-center py-2 border-b border-white/5">
-                  <span className="text-zinc-400">Total Paid:</span>
-                  <span className="text-emerald-400 font-black text-base">₹{confirmedTicket.amount}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-white/5">
-                  <span className="text-zinc-400">Transaction ID:</span>
-                  <span className="text-zinc-400 text-[10px] select-all">{confirmedTicket.payment_id}</span>
-                </div>
               </div>
 
-              {/* Group Guest List Breakdown */}
-              {attendees.length > 0 && (
-                <div className="bg-zinc-950/70 p-4 rounded-2xl border border-white/5 space-y-3 font-mono">
-                  <div className="flex items-center justify-between text-xs pb-2 border-b border-white/10">
-                    <span className="text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" /> Group Guest List Breakdown
-                    </span>
-                    <span className="text-zinc-400 text-[11px]">{attendees.length} Verified Guests</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    {attendees.map((guest, idx) => (
-                      <div key={idx} className="bg-zinc-900/80 p-2.5 rounded-xl border border-zinc-800 flex items-center justify-between">
-                        <div>
-                          <span className="text-[10px] text-zinc-500 block">GUEST #{guest.guest_number || idx + 1}</span>
-                          <span className="font-bold text-white text-[11px]">{guest.name}</span>
-                        </div>
-                        <span className="text-[10px] text-zinc-400 font-mono">+{guest.phone}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Perforated Divider */}
-              <div className="relative py-2">
-                <div className="border-t-2 border-dashed border-white/15 w-full" />
-                <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-zinc-950 border-r-2 border-amber-500/40" />
-                <div className="absolute -right-10 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-zinc-950 border-l-2 border-amber-500/40" />
+              {/* OVERLAY 3: Bottom Golden Box -> Clean Serial Number (RD-PASS-2026-XXXXXX) */}
+              <div
+                className="absolute flex items-center justify-center text-center px-1"
+                style={{
+                  left: '73.86%',
+                  top: '80.13%',
+                  width: '19.14%',
+                  height: '6.59%'
+                }}
+              >
+                <span className="font-mono font-black text-amber-950 text-[7px] xs:text-[9px] sm:text-[11px] md:text-xs lg:text-sm tracking-wider select-all">
+                  {confirmedTicket.ticket_serial || confirmedTicket.serial_number}
+                </span>
               </div>
-
-              {/* QR Code & Serial Number Section */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-2">
-                <div className="p-3 bg-white rounded-xl shadow-lg flex items-center justify-center shrink-0">
-                  <div className="w-28 h-28 relative flex items-center justify-center bg-zinc-950 text-white rounded">
-                    <QrCode className="w-24 h-24 text-amber-400" />
-                  </div>
-                </div>
-
-                <div className="text-center sm:text-left space-y-1 flex-1">
-                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block">
-                    UNIQUE PASS SERIAL NUMBER (KEEP HANDY)
-                  </span>
-                  <div className="font-mono text-xl font-black text-amber-400 tracking-wider select-all bg-zinc-950 px-3.5 py-2 rounded-xl border border-amber-500/40 inline-block">
-                    {confirmedTicket.serial_number}
-                  </div>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed pt-1">
-                    Present this digital pass or serial at the Finn reception counter on <strong>November 7th</strong> for wristband redemption.
-                  </p>
-                </div>
-              </div>
-
-              {/* Partner Badges Strip on Ticket */}
-              <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-center gap-5">
-                {PARTNER_LOGOS.map((partner) => (
-                  <div key={partner.name} className="flex flex-col items-center gap-1.5 grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
-                    <img 
-                      src={partner.url} 
-                      alt={partner.name} 
-                      className="h-6 w-auto object-contain max-w-[90px]" 
-                      onError={(e) => { e.target.style.display = 'none'; }}
-                    />
-                    <div className="text-center">
-                      <span className="text-[8px] font-mono uppercase tracking-wider text-amber-400 block leading-none">{partner.role}</span>
-                      <span className="text-[8px] font-mono uppercase tracking-wide text-zinc-500 block leading-none mt-0.5">{partner.name}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-            </div>
-
-            {/* Bottom Security Footer */}
-            <div className="bg-zinc-950 p-4 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-zinc-500">
-              <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                VERIFIED CRYPTOGRAPHIC PASS
-              </span>
-              <span>RENDERDROPS X FINN</span>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 print:hidden">
+          {/* Action Buttons for Download / Mobile Save / Print */}
+          <div className="flex flex-col sm:flex-row gap-3 print:hidden">
             <button
-              onClick={handlePrint}
-              className="flex-1 py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold uppercase tracking-wider text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_25px_rgba(245,158,11,0.3)] cursor-pointer"
+              onClick={handleDownloadPass}
+              disabled={isGeneratingDownload}
+              className="flex-1 py-4 px-6 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-black font-extrabold uppercase tracking-wider text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_25px_rgba(245,158,11,0.35)] cursor-pointer disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
-              <span>Download / Print Digital Pass</span>
+              <span>{isGeneratingDownload ? 'Rendering Pass...' : 'Download Pass (HD Image)'}</span>
             </button>
+
             <button
-              onClick={() => {
-                setConfirmedTicket(null);
-                setFormData({ name: '', email: '', phone: '' });
-                setGroupMembers([]);
-                setAppliedPromo(null);
-              }}
-              className="flex-1 py-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-bold uppercase tracking-wider text-xs rounded-xl transition-colors cursor-pointer"
+              onClick={handleShareOrSave}
+              disabled={isGeneratingDownload}
+              className="flex-1 py-4 px-6 bg-zinc-900 hover:bg-zinc-800 border border-amber-500/30 text-amber-300 font-bold uppercase tracking-wider text-xs rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
-              Book Another Pass
+              <Share2 className="w-4 h-4" />
+              <span>Save / Share Pass</span>
             </button>
+
+            <button
+              onClick={handlePrint}
+              className="py-4 px-6 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-bold uppercase tracking-wider text-xs rounded-xl transition-colors cursor-pointer hidden md:flex items-center justify-center gap-2"
+            >
+              <span>Print</span>
+            </button>
+          </div>
+
+          {/* Complete Booking & Attendee Verification Card */}
+          <div className="bg-zinc-900/90 border border-amber-500/30 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-2">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-amber-400 font-bold block">
+                  // OFFICIAL ENTRY PASS VERIFICATION
+                </span>
+                <h3 className="font-display text-2xl uppercase tracking-tight text-white mt-0.5">
+                  BOOKING DETAILS & GUEST LIST
+                </h3>
+              </div>
+              <div className="font-mono text-xs text-amber-400 font-bold bg-amber-500/10 border border-amber-500/25 px-3 py-1 rounded-lg w-fit">
+                {confirmedTicket.pass_type} (Admits {confirmedTicket.quantity || 1})
+              </div>
+            </div>
+
+            {/* Quick Metadata Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 font-mono text-xs">
+              <div className="bg-zinc-950/60 p-3.5 rounded-xl border border-zinc-800">
+                <span className="text-zinc-500 text-[10px] block mb-1">PRIMARY ATTENDEE</span>
+                <span className="font-bold text-white block">{confirmedTicket.buyer_name || confirmedTicket.name}</span>
+                <span className="text-zinc-400 text-[11px] block mt-0.5">+{confirmedTicket.buyer_phone || confirmedTicket.phone}</span>
+              </div>
+
+              <div className="bg-zinc-950/60 p-3.5 rounded-xl border border-zinc-800">
+                <span className="text-zinc-500 text-[10px] block mb-1">DATE & TIMINGS</span>
+                <span className="font-bold text-amber-300 flex items-center gap-1">
+                  <Calendar className="w-3 h-3" /> Nov 7th
+                </span>
+                <span className="text-zinc-400 text-[11px] block mt-0.5">1 PM onwards</span>
+              </div>
+
+              <div className="bg-zinc-950/60 p-3.5 rounded-xl border border-zinc-800">
+                <span className="text-zinc-500 text-[10px] block mb-1">VENUE</span>
+                <span className="font-bold text-white flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-red-500" /> Finn Club
+                </span>
+                <span className="text-zinc-400 text-[11px] block mt-0.5">Bangalore</span>
+              </div>
+
+              <div className="bg-zinc-950/60 p-3.5 rounded-xl border border-zinc-800">
+                <span className="text-zinc-500 text-[10px] block mb-1">TOTAL PAID</span>
+                <span className="font-bold text-emerald-400 text-base block">₹{confirmedTicket.amount}</span>
+                {confirmedTicket.promo_code && (
+                  <span className="text-emerald-400/90 text-[10px] block">
+                    Code: {confirmedTicket.promo_code} (-₹{confirmedTicket.discount_amount})
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Group Guest List Breakdown (if multi-attendee pass) */}
+            {attendees.length > 0 && (
+              <div className="bg-zinc-950/80 p-5 rounded-2xl border border-zinc-800 space-y-3 font-mono">
+                <div className="flex items-center justify-between text-xs pb-2 border-b border-zinc-800">
+                  <span className="text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5" /> Group Guest List Breakdown ({attendees.length} Attendees)
+                  </span>
+                  <span className="text-zinc-500 text-[10px]">Wristbands issued at gate</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                  {attendees.map((guest, idx) => (
+                    <div key={idx} className="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800 flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] text-zinc-500 block">GUEST #{guest.guest_number || idx + 1}</span>
+                        <span className="font-bold text-white text-xs">{guest.name}</span>
+                      </div>
+                      <span className="text-[11px] text-zinc-400 font-mono">+{guest.phone}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Instructions */}
+            <div className="p-4 bg-zinc-950/50 rounded-2xl border border-white/5 flex items-start gap-3 text-xs text-zinc-400 font-mono">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <p className="leading-relaxed">
+                Present this digital pass or mention your unique serial number (<strong>{confirmedTicket.serial_number}</strong>) at the Finn reception counter on <strong>November 7th</strong> for door entry wristband assignment. Strictly 18+ entry with valid ID proof.
+              </p>
+            </div>
+
+            <div className="text-center pt-2">
+              <button
+                onClick={() => {
+                  setConfirmedTicket(null);
+                  setFormData({ name: '', email: '', phone: '' });
+                  setGroupMembers([]);
+                  setAppliedPromo(null);
+                }}
+                className="text-xs font-mono text-zinc-400 hover:text-white underline cursor-pointer"
+              >
+                + Book Another Freshers Pass
+              </button>
+            </div>
           </div>
 
         </div>
@@ -1005,11 +1143,28 @@ export default function FreshersPass({ onBackToHome }) {
               All passes include entrance, wristband, club floor privileges, and digital confirmation pass.
             </p>
 
-            {/* High-visibility green promotional badge before user applies code */}
-            <div className="pt-2">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
-                <Tag className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>PROMO OFFER: Apply an eligible promo code to get ₹100 OFF your pass!</span>
+            {/* High-visibility promotional callout banner explaining exact variable tier savings */}
+            <div className="pt-3 max-w-xl mx-auto">
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/80 via-emerald-900/50 to-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-mono shadow-[0_0_30px_rgba(16,185,129,0.2)] text-left flex items-start gap-3.5">
+                <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shrink-0 mt-0.5">
+                  <Tag className="w-4 h-4" />
+                </div>
+                <div className="space-y-1">
+                  <span className="font-bold text-emerald-400 block uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    SPECIAL TIER-BASED PROMO DISCOUNTS UNLOCKED
+                  </span>
+                  <p className="text-zinc-200 text-xs leading-relaxed">
+                    Apply an eligible promo code (<strong>VELVET-VIBE</strong>, <strong>GOLDENHOUR</strong>, <strong>AFTER.DARK</strong>, <strong>LUXE-ACCESS</strong>, <strong>TXJAS.AFTDARK7</strong>) to unlock instant tier savings:
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-1 text-[11px] text-emerald-300 font-bold">
+                    <span className="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">Early Bird: -₹50</span>
+                    <span className="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">Stag: -₹50</span>
+                    <span className="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">Couple: -₹100</span>
+                    <span className="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">Group of 5: -₹200</span>
+                    <span className="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">Group of 10: -₹450</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1068,17 +1223,22 @@ export default function FreshersPass({ onBackToHome }) {
 
                       {hasDiscount ? (
                         <div className="flex items-center gap-1.5 mt-1">
-                          <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">
-                            SAVE ₹{tier.promoDiscount} WITH CODE
+                          <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> SAVED ₹{tier.promoDiscount} WITH CODE
                           </span>
                           <span className="text-[10px] font-mono text-zinc-400">
                             Admits: {tier.admits}
                           </span>
                         </div>
                       ) : (
-                        <span className="text-[11px] font-mono text-amber-400/90 block mt-0.5">
-                          {tier.perPerson} • Admits: {tier.admits}
-                        </span>
+                        <div className="space-y-1.5 mt-1">
+                          <span className="text-[11px] font-mono text-amber-400/90 block">
+                            {tier.perPerson} • Admits: {tier.admits}
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded">
+                            <Tag className="w-2.5 h-2.5" /> Promo discount: -₹{tier.promoDiscount} OFF
+                          </span>
+                        </div>
                       )}
                     </div>
 
@@ -1164,9 +1324,14 @@ export default function FreshersPass({ onBackToHome }) {
 
               {/* High-visibility green promotional badge before user applies code */}
               {!isPromoApplied && (
-                <div className="mb-3 p-3 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center gap-2.5">
-                  <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
-                  <span>Applying an eligible promo code gives you <strong>₹100 OFF</strong> instantly!</span>
+                <div className="mb-3 p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-mono space-y-1">
+                  <div className="flex items-center gap-2 text-emerald-400 font-bold">
+                    <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
+                    <span>Eligible Promo Code Available for this Pass!</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-300 leading-relaxed">
+                    Applying an eligible promo code gives you <strong>-₹{selectedTier.promoDiscount} OFF</strong> on your <strong>{selectedTier.title}</strong> pass (Pay ₹{selectedTier.price - selectedTier.promoDiscount})!
+                  </p>
                 </div>
               )}
 
@@ -1390,6 +1555,29 @@ export default function FreshersPass({ onBackToHome }) {
                 <Lock className="w-3.5 h-3.5 text-emerald-500" />
                 <span>256-bit Secure Razorpay Payment Gateway (UPI / Cards / NetBanking)</span>
               </div>
+
+              {/* Payment Error & Friendly Retry State */}
+              {paymentError && (
+                <div className="p-4 rounded-xl bg-red-950/60 border border-red-500/50 text-red-200 text-xs font-mono space-y-2">
+                  <div className="flex items-start gap-2.5">
+                    <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <span className="font-bold text-red-300 block">Payment Notice</span>
+                      <p className="leading-relaxed text-zinc-300">{paymentError}</p>
+                    </div>
+                  </div>
+                  <div className="pt-1 flex items-center justify-between border-t border-red-900/40 text-[11px] text-zinc-400">
+                    <span>You can retry anytime without losing your entered details.</span>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentError(null)}
+                      className="text-amber-400 hover:text-white underline cursor-pointer"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Pay Button */}
               <button
