@@ -55,7 +55,7 @@ const PARTNER_LOGOS = [
 // Official Event Poster from Supabase Storage
 const SUPABASE_POSTER_STORAGE_URL = "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/official%20poster%20%20(1).webp";
 
-// Official Promo Codes Specification (Eligible promo codes give ₹100 OFF)
+// Official promo codes are valid across ticket tiers with tier-specific discounts.
 const VALID_PROMO_CODES = [
   'VELVET-VIBE',
   'GOLDENHOUR',
@@ -71,11 +71,11 @@ const PRICING_TIERS = [
     title: 'Early Bird',
     badge: 'LIMITED ALLOCATION',
     badgeColor: 'amber',
-    price: 399,
-    promoDiscount: 100,
-    discountedPrice: 299,
+    price: 449,
+    promoDiscount: 50,
+    discountedPrice: 399,
     admits: 1,
-    perPerson: '₹399 / person',
+    perPerson: '₹449 / person',
     description: 'Special launch pricing available for the first 150 tickets.',
     perks: [
       'Special Launch Pricing',
@@ -89,11 +89,11 @@ const PRICING_TIERS = [
     title: 'Stag Entry',
     badge: 'POPULAR',
     badgeColor: 'zinc',
-    price: 499,
-    promoDiscount: 100,
-    discountedPrice: 399,
+    price: 549,
+    promoDiscount: 50,
+    discountedPrice: 499,
     admits: 1,
-    perPerson: '₹499 / person',
+    perPerson: '₹549 / person',
     description: 'Single-person party pass for the full Freshers celebration.',
     perks: [
       'Single-Person Party Pass',
@@ -107,11 +107,11 @@ const PRICING_TIERS = [
     title: 'Couple Pass',
     badge: 'BEST VALUE',
     badgeColor: 'red',
-    price: 849,
-    promoDiscount: 100,
-    discountedPrice: 749,
+    price: 899,
+    promoDiscount: 50,
+    discountedPrice: 849,
     admits: 2,
-    perPerson: '₹425 / person',
+    perPerson: '₹450 / person',
     description: 'One pass valid for two attendees for a shared night out experience.',
     perks: [
       'Entry for Two Attendees',
@@ -125,11 +125,11 @@ const PRICING_TIERS = [
     title: 'Group of 5',
     badge: 'CREW SAVINGS',
     badgeColor: 'amber',
-    price: 2550,
-    promoDiscount: 100,
-    discountedPrice: 2450,
+    price: 2700,
+    promoDiscount: 150,
+    discountedPrice: 2550,
     admits: 5,
-    perPerson: '₹510 / person',
+    perPerson: '₹540 / person',
     description: 'One squad pass for 5 friends to celebrate together and create shared memories.',
     perks: [
       'Entry for Five Friends',
@@ -143,11 +143,11 @@ const PRICING_TIERS = [
     title: 'Group of 10',
     badge: 'VIP CREW',
     badgeColor: 'amber',
-    price: 4950,
-    promoDiscount: 100,
-    discountedPrice: 4850,
+    price: 5299,
+    promoDiscount: 150,
+    discountedPrice: 5149,
     admits: 10,
-    perPerson: '₹495 / person',
+    perPerson: '₹530 / person',
     description: 'One pass for your entire crew of 10 for an unforgettable celebration.',
     perks: [
       'Entry for Ten Attendees',
@@ -250,7 +250,7 @@ export default function FreshersPass({ onBackToHome }) {
 
   // Calculate pricing & discount
   const isPromoApplied = Boolean(appliedPromo && VALID_PROMO_CODES.includes(appliedPromo));
-  const currentDiscount = isPromoApplied ? (selectedTier.promoDiscount || 100) : 0;
+  const currentDiscount = isPromoApplied ? selectedTier.promoDiscount : 0;
   const finalPrice = Math.max(0, selectedTier.price - currentDiscount);
 
   // Promo code submission handler
@@ -423,6 +423,7 @@ export default function FreshersPass({ onBackToHome }) {
           notes: {
             pass_tier: selectedTier.title,
             promo_code: isPromoApplied ? appliedPromo : 'none',
+            discount_amount: String(currentDiscount),
             buyer_phone: formData.phone
           }
         })
@@ -502,7 +503,8 @@ export default function FreshersPass({ onBackToHome }) {
         venue: 'Finn – The Luxury Club',
         date: 'November 7th',
         admits: selectedTier.admits,
-        promo_code: isPromoApplied ? appliedPromo : 'NONE'
+        promo_code: isPromoApplied ? appliedPromo : 'NONE',
+        discount_amount: String(currentDiscount)
       },
       theme: {
         color: '#E31B2E',
@@ -1009,7 +1011,7 @@ export default function FreshersPass({ onBackToHome }) {
             <div className="pt-2">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
                 <Tag className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>PROMO OFFER: Apply an eligible promo code to get ₹100 OFF your pass!</span>
+                <span>PROMO OFFER: Save ₹50 on individual and couple passes, or ₹150 on group passes with an eligible code.</span>
               </div>
             </div>
           </div>
@@ -1076,9 +1078,14 @@ export default function FreshersPass({ onBackToHome }) {
                           </span>
                         </div>
                       ) : (
-                        <span className="text-[11px] font-mono text-amber-400/90 block mt-0.5">
-                          {tier.perPerson} • Admits: {tier.admits}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+                          <span className="text-[11px] font-mono text-amber-400/90">
+                            {tier.perPerson} • Admits: {tier.admits}
+                          </span>
+                          <span className="text-[10px] font-mono text-emerald-400">
+                            ₹{tier.discountedPrice} with code (save ₹{tier.promoDiscount})
+                          </span>
+                        </div>
                       )}
                     </div>
 
@@ -1166,7 +1173,7 @@ export default function FreshersPass({ onBackToHome }) {
               {!isPromoApplied && (
                 <div className="mb-3 p-3 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center gap-2.5">
                   <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
-                  <span>Applying an eligible promo code gives you <strong>₹100 OFF</strong> instantly!</span>
+                  <span>This pass gets you <strong>₹{selectedTier.promoDiscount} OFF</strong> with an eligible promo code!</span>
                 </div>
               )}
 
