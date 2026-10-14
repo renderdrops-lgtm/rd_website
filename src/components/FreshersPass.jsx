@@ -76,11 +76,11 @@ const PRICING_TIERS = [
     title: 'Early Bird',
     badge: 'LIMITED ALLOCATION',
     badgeColor: 'amber',
-    price: 399,
+    price: 449,
     promoDiscount: 50,
-    discountedPrice: 349,
+    discountedPrice: 399,
     admits: 1,
-    perPerson: '₹399 / person',
+    perPerson: '₹449 / person',
     description: 'Special launch pricing available for the first 150 tickets.',
     perks: [
       'Special Launch Pricing',
@@ -94,11 +94,11 @@ const PRICING_TIERS = [
     title: 'Stag Entry',
     badge: 'POPULAR',
     badgeColor: 'zinc',
-    price: 499,
+    price: 549,
     promoDiscount: 50,
-    discountedPrice: 449,
+    discountedPrice: 499,
     admits: 1,
-    perPerson: '₹499 / person',
+    perPerson: '₹549 / person',
     description: 'Single-person party pass for the full Freshers celebration.',
     perks: [
       'Single-Person Party Pass',
@@ -112,11 +112,11 @@ const PRICING_TIERS = [
     title: 'Couple Pass',
     badge: 'BEST VALUE',
     badgeColor: 'red',
-    price: 849,
+    price: 899,
     promoDiscount: 100,
-    discountedPrice: 749,
+    discountedPrice: 799,
     admits: 2,
-    perPerson: '₹425 / person',
+    perPerson: '₹450 / person',
     description: 'One pass valid for two attendees for a shared night out experience.',
     perks: [
       'Entry for Two Attendees',
@@ -130,11 +130,11 @@ const PRICING_TIERS = [
     title: 'Group of 5',
     badge: 'CREW SAVINGS',
     badgeColor: 'amber',
-    price: 2550,
-    promoDiscount: 200,
-    discountedPrice: 2350,
+    price: 2700,
+    promoDiscount: 150,
+    discountedPrice: 2550,
     admits: 5,
-    perPerson: '₹510 / person',
+    perPerson: '₹540 / person',
     description: 'One squad pass for 5 friends to celebrate together and create shared memories.',
     perks: [
       'Entry for Five Friends',
@@ -148,11 +148,11 @@ const PRICING_TIERS = [
     title: 'Group of 10',
     badge: 'VIP CREW',
     badgeColor: 'amber',
-    price: 4950,
-    promoDiscount: 450,
-    discountedPrice: 4500,
+    price: 5299,
+    promoDiscount: 349,
+    discountedPrice: 4950,
     admits: 10,
-    perPerson: '₹495 / person',
+    perPerson: '₹530 / person',
     description: 'One pass for your entire crew of 10 for an unforgettable celebration.',
     perks: [
       'Entry for Ten Attendees',
@@ -1152,18 +1152,11 @@ export default function FreshersPass({ onBackToHome }) {
                 <div className="space-y-1">
                   <span className="font-bold text-emerald-400 block uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                    SPECIAL TIER-BASED PROMO DISCOUNTS UNLOCKED
+                    Special Tier-Based Discounts Available
                   </span>
                   <p className="text-zinc-200 text-xs leading-relaxed">
-                    Apply an eligible promo code (<strong>VELVET-VIBE</strong>, <strong>GOLDENHOUR</strong>, <strong>AFTER.DARK</strong>, <strong>LUXE-ACCESS</strong>, <strong>TXJAS.AFTDARK7</strong>) to unlock instant tier savings:
+                    Apply a valid promo code below to unlock instant savings on your selected pass tier!
                   </p>
-                  <div className="flex flex-wrap gap-2 pt-1 text-[11px] text-emerald-300 font-bold">
-                    <span className="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">Early Bird: -₹50</span>
-                    <span className="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">Stag: -₹50</span>
-                    <span className="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">Couple: -₹100</span>
-                    <span className="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">Group of 5: -₹200</span>
-                    <span className="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">Group of 10: -₹450</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1236,7 +1229,7 @@ export default function FreshersPass({ onBackToHome }) {
                             {tier.perPerson} • Admits: {tier.admits}
                           </span>
                           <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded">
-                            <Tag className="w-2.5 h-2.5" /> Promo discount: -₹{tier.promoDiscount} OFF
+                            <Tag className="w-2.5 h-2.5" /> Apply a valid promo code to get ₹{tier.promoDiscount} off
                           </span>
                         </div>
                       )}
@@ -1327,10 +1320,10 @@ export default function FreshersPass({ onBackToHome }) {
                 <div className="mb-3 p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-mono space-y-1">
                   <div className="flex items-center gap-2 text-emerald-400 font-bold">
                     <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
-                    <span>Eligible Promo Code Available for this Pass!</span>
+                    <span>Special Promo Discount Available</span>
                   </div>
                   <p className="text-[11px] text-zinc-300 leading-relaxed">
-                    Applying an eligible promo code gives you <strong>-₹{selectedTier.promoDiscount} OFF</strong> on your <strong>{selectedTier.title}</strong> pass (Pay ₹{selectedTier.price - selectedTier.promoDiscount})!
+                    Apply a valid promo code to get <strong>₹{selectedTier.promoDiscount} off</strong> your <strong>{selectedTier.title}</strong> pass (Pay ₹{selectedTier.price - selectedTier.promoDiscount})!
                   </p>
                 </div>
               )}
