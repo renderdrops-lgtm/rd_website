@@ -32,28 +32,28 @@ import logoImg from '../assets/logo.png';
 const PARTNER_LOGOS = [
   {
     name: 'RenderDrops',
-    role: 'Presenter',
-    url: 'https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/renderdrops.webp'
-  },
-  {
-    name: 'Finn (The Luxury Club)',
-    role: 'Official Venue',
-    url: 'https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/finn%20the%20luxury%20club.webp'
+    role: 'Official Digital Partner',
+    url: 'https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/rd_new.webp'
   },
   {
     name: 'Velvet Vault',
-    role: 'Partner',
+    role: 'Official Presenter',
     url: 'https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/velvet%20vault.webp'
   },
   {
     name: 'AR Events',
     role: 'Event Partner',
     url: 'https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/ar%20events.webp'
+  },
+  {
+    name: 'Finn (The Luxury Club)',
+    role: 'Official Venue',
+    url: 'https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/finn%20the%20luxury%20club.webp'
   }
 ];
 
-// Configurable Supabase storage URL for the event poster
-const SUPABASE_POSTER_STORAGE_URL = "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/freshers_party_poster.png";
+// Official Event Poster from Supabase Storage
+const SUPABASE_POSTER_STORAGE_URL = "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/official%20poster%20.webp";
 
 // Official Promo Code Specification
 const VALID_PROMO_CODE = 'TXJAS.AFTDARK7';
@@ -262,7 +262,7 @@ export default function FreshersPass({ onBackToHome }) {
       setAppliedPromo(cleanCode);
       setPromoError('');
     } else {
-      setPromoError('Invalid code. Enter valid promo code (e.g. TXJAS.AFTDARK7)');
+      setPromoError('Invalid promo code. Please check your code and try again.');
     }
   };
 
@@ -592,7 +592,7 @@ export default function FreshersPass({ onBackToHome }) {
                   FRESHERS PARTY <span className="text-amber-400">2026</span>
                 </h1>
                 <p className="text-xs text-zinc-400 font-mono mt-2">
-                  BANGALORE'S PREMIER NIGHTLIFE EXPERIENCE
+                  BANGALORE'S PREMIER DAY PARTY EXPERIENCE
                 </p>
               </div>
 
@@ -603,14 +603,14 @@ export default function FreshersPass({ onBackToHome }) {
                   <span className="text-amber-300 font-bold flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5" /> November 7th
                   </span>
-                  <span className="text-zinc-400 text-[11px] block mt-0.5">Doors open: 7:00 PM</span>
+                  <span className="text-zinc-400 text-[11px] block mt-0.5">1 PM onwards · Day Party</span>
                 </div>
                 <div>
                   <span className="text-zinc-500 text-[10px] block mb-0.5">VENUE</span>
                   <span className="text-white font-bold flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-red-500" /> Finn – The Luxury Club
                   </span>
-                  <span className="text-zinc-400 text-[11px] block mt-0.5">Premier Club Experience</span>
+                  <span className="text-zinc-400 text-[11px] block mt-0.5">Bangalore, Karnataka</span>
                 </div>
               </div>
 
@@ -704,18 +704,19 @@ export default function FreshersPass({ onBackToHome }) {
               </div>
 
               {/* Partner Badges Strip on Ticket */}
-              <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-center gap-6">
+              <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-center gap-5">
                 {PARTNER_LOGOS.map((partner) => (
-                  <div key={partner.name} className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                  <div key={partner.name} className="flex flex-col items-center gap-1.5 grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
                     <img 
                       src={partner.url} 
                       alt={partner.name} 
-                      className="h-5 w-auto object-contain max-w-[80px]" 
+                      className="h-6 w-auto object-contain max-w-[90px]" 
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
-                    <span className="text-[9px] font-mono uppercase tracking-wider text-zinc-400">
-                      {partner.name}
-                    </span>
+                    <div className="text-center">
+                      <span className="text-[8px] font-mono uppercase tracking-wider text-amber-400 block leading-none">{partner.role}</span>
+                      <span className="text-[8px] font-mono uppercase tracking-wide text-zinc-500 block leading-none mt-0.5">{partner.name}</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -833,7 +834,7 @@ export default function FreshersPass({ onBackToHome }) {
           </h1>
 
           <p className="text-zinc-400 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-            Bangalore's finest luxury club night. A high-voltage celebration designed with elite club production, curated DJs, state-of-the-art visuals, and official RenderDrops cinematic aftermovie coverage.
+            Bangalore's biggest freshers day party. A high-energy afternoon celebration with state-of-the-art sound, kinetic laser fixtures, signature red carpet entrance, commercial hip-hop sets, and official RenderDrops cinematic after-movie shoot.
           </p>
 
           {/* Key Event Specs Grid */}
@@ -845,7 +846,7 @@ export default function FreshersPass({ onBackToHome }) {
               <div>
                 <span className="text-[10px] font-mono text-zinc-500 uppercase block">EVENT DATE</span>
                 <span className="text-base font-bold text-white block">November 7th</span>
-                <span className="text-[11px] text-amber-400 font-mono">Friday Night Special</span>
+                <span className="text-[11px] text-amber-400 font-mono">Day Party Special</span>
               </div>
             </div>
 
@@ -856,7 +857,7 @@ export default function FreshersPass({ onBackToHome }) {
               <div>
                 <span className="text-[10px] font-mono text-zinc-500 uppercase block">VENUE</span>
                 <span className="text-base font-bold text-white block">Finn – Luxury Club</span>
-                <span className="text-[11px] text-zinc-400 font-mono">Premier Nightlife</span>
+                <span className="text-[11px] text-zinc-400 font-mono">Bangalore</span>
               </div>
             </div>
 
@@ -866,8 +867,8 @@ export default function FreshersPass({ onBackToHome }) {
               </div>
               <div>
                 <span className="text-[10px] font-mono text-zinc-500 uppercase block">TIMINGS</span>
-                <span className="text-base font-bold text-white block">7:00 PM Onwards</span>
-                <span className="text-[11px] text-zinc-400 font-mono">Late Night Finale</span>
+                <span className="text-base font-bold text-white block">1 PM Onwards</span>
+                <span className="text-[11px] text-zinc-400 font-mono">Afternoon Day Party</span>
               </div>
             </div>
           </div>
@@ -977,10 +978,10 @@ export default function FreshersPass({ onBackToHome }) {
                       <Music className="w-3.5 h-3.5 text-amber-400" /> Commercial & Hip-Hop Sets
                     </span>
                     <span className="flex items-center gap-1.5 text-zinc-300">
-                      <Camera className="w-3.5 h-3.5 text-red-500" /> 4K Aftermovie Shoot
+                      <Camera className="w-3.5 h-3.5 text-red-500" /> Live After-Movie Shoot
                     </span>
                     <span className="flex items-center gap-1.5 text-zinc-300">
-                      <PartyPopper className="w-3.5 h-3.5 text-amber-400" /> Student Night Special
+                      <PartyPopper className="w-3.5 h-3.5 text-amber-400" /> Freshers Day Party Special
                     </span>
                   </div>
                 </div>
@@ -1172,7 +1173,7 @@ export default function FreshersPass({ onBackToHome }) {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Enter promo code (e.g. TXJAS.AFTDARK7)"
+                    placeholder=""
                     value={promoInput}
                     onChange={(e) => {
                       setPromoInput(e.target.value);
@@ -1223,7 +1224,7 @@ export default function FreshersPass({ onBackToHome }) {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Aryan Sharma"
+                    placeholder=""
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className={`w-full bg-zinc-950 border rounded-xl px-4 py-3.5 text-white placeholder-zinc-600 text-base sm:text-sm focus:outline-none transition-colors ${
@@ -1241,7 +1242,7 @@ export default function FreshersPass({ onBackToHome }) {
                   <input
                     type="email"
                     required
-                    placeholder="e.g. aryan@gmail.com"
+                    placeholder=""
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className={`w-full bg-zinc-950 border rounded-xl px-4 py-3.5 text-white placeholder-zinc-600 text-base sm:text-sm focus:outline-none transition-colors ${
@@ -1263,7 +1264,7 @@ export default function FreshersPass({ onBackToHome }) {
                     <input
                       type="tel"
                       required
-                      placeholder="9876543210"
+                      placeholder=""
                       maxLength={10}
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/[^0-9]/g, '') })}
@@ -1347,7 +1348,7 @@ export default function FreshersPass({ onBackToHome }) {
                                   type="tel"
                                   required
                                   maxLength={10}
-                                  placeholder="9876543210"
+                                  placeholder=""
                                   value={member.phone}
                                   onChange={(e) => handleGroupMemberChange(index, 'phone', e.target.value)}
                                   className={`w-full bg-zinc-900 border rounded-xl pl-11 pr-3 py-2.5 text-white placeholder-zinc-600 text-xs focus:outline-none ${
