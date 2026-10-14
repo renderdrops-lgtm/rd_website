@@ -48,7 +48,7 @@ export default function PassesAdminDashboard() {
     }
   });
 
-  const SECRET_PASSCODE = 'renderdrops2026';
+  const SECRET_PASSCODE = 'AftDarkPassAdmin#2026';
 
   const handleLogin = (e) => {
     e.preventDefault();
