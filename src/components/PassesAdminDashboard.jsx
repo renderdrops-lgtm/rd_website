@@ -176,11 +176,80 @@ export default function PassesAdminDashboard() {
     };
   }, [tickets, checkedInIds]);
 
+  // Robust case-insensitive search matching across all ticket attributes
+  const matchesSearchQuery = (t, rawQuery) => {
+    if (!rawQuery) return false;
+    const q = rawQuery.trim().toLowerCase();
+    if (!q) return false;
+
+    const serial = (t.ticket_serial || t.serial_number || t.confirmation_id || '').toLowerCase();
+    const buyerName = (t.buyer_name || t.name || '').toLowerCase();
+    const phone = (t.buyer_phone || t.phone || '').toLowerCase();
+    const email = (t.buyer_email || t.email || '').toLowerCase();
+    const paymentId = (t.razorpay_payment_id || t.payment_id || '').toLowerCase();
+    const promo = (t.promo_code_used || t.promo_code || '').toLowerCase();
+
+    // Group members / attendees: handles array of objects, array of strings, or raw string
+    let membersStr = '';
+    if (Array.isArray(t.group_members)) {
+      membersStr = t.group_members
+        .map(m => {
+          if (!m) return '';
+          if (typeof m === 'string') return m;
+          return `${m.name || ''} ${m.phone || ''} ${m.email || ''}`;
+        })
+        .join(' ')
+        .toLowerCase();
+    } else if (typeof t.group_members === 'string') {
+      membersStr = t.group_members.toLowerCase();
+    }
+
+    // Direct case-insensitive substring search (.includes)
+    if (
+      serial.includes(q) ||
+      buyerName.includes(q) ||
+      phone.includes(q) ||
+      email.includes(q) ||
+      paymentId.includes(q) ||
+      promo.includes(q) ||
+      membersStr.includes(q)
+    ) {
+      return true;
+    }
+
+    // Digits-only substring lookup for phone numbers & serial digits (e.g. typing "8919" matches "+91 98765 08919")
+    const qDigits = q.replace(/[^0-9]/g, '');
+    if (qDigits.length >= 3) {
+      const phoneDigits = phone.replace(/[^0-9]/g, '');
+      if (phoneDigits && phoneDigits.includes(qDigits)) return true;
+
+      const serialDigits = serial.replace(/[^0-9]/g, '');
+      if (serialDigits && serialDigits.includes(qDigits)) return true;
+
+      if (Array.isArray(t.group_members)) {
+        const memberDigitMatch = t.group_members.some(m => {
+          const mPhone = (m?.phone || '').replace(/[^0-9]/g, '');
+          return mPhone && mPhone.includes(qDigits);
+        });
+        if (memberDigitMatch) return true;
+      }
+    }
+
+    // Alphanumeric clean match for serial codes or payment IDs (e.g. "RK4A33" in "RD-PASS-2026-RK4A33")
+    const qClean = q.replace(/[^a-z0-9]/g, '');
+    if (qClean.length >= 3) {
+      const serialClean = serial.replace(/[^a-z0-9]/g, '');
+      if (serialClean && serialClean.includes(qClean)) return true;
+
+      const paymentClean = paymentId.replace(/[^a-z0-9]/g, '');
+      if (paymentClean && paymentClean.includes(qClean)) return true;
+    }
+
+    return false;
+  };
+
   // Filtered tickets based on search and filters
   const filteredTickets = useMemo(() => {
-    // Normalize: trim and collapse internal whitespace
-    const query = searchQuery.trim().replace(/\s+/g, ' ').toLowerCase();
-
     return tickets.filter(t => {
       // Tier filter
       if (selectedTierFilter !== 'ALL' && t.pass_type !== selectedTierFilter) {
@@ -194,67 +263,16 @@ export default function PassesAdminDashboard() {
         if (promoFieldVal.trim().toUpperCase() !== selectedPromoFilter) return false;
       }
 
-      if (!query) return true;
+      if (!searchQuery.trim()) return true;
 
-      // Helper: check if query matches end (last N digits) of a field string
-      const endsWithQuery = (field) => {
-        const clean = (field || '').replace(/\s+/g, '').toLowerCase();
-        const q = query.replace(/\s+/g, '');
-        if (q.length < 4) return false; // Only activate suffix match for 4+ char queries
-        return clean.endsWith(q);
-      };
-
-      // Build flattened member search string (names + phones)
-      let membersStr = '';
-      if (Array.isArray(t.group_members)) {
-        membersStr = t.group_members.map(m => `${m.name || ''} ${m.phone || ''}`).join(' ').toLowerCase();
-      } else if (typeof t.group_members === 'string') {
-        membersStr = t.group_members.toLowerCase();
-      }
-
-      const serialVal  = t.ticket_serial || t.serial_number || t.confirmation_id || '';
-      const phoneVal   = t.buyer_phone || t.phone || '';
-      const paymentVal = t.razorpay_payment_id || t.payment_id || '';
-      const buyerVal   = t.buyer_name || t.name || '';
-      const emailVal   = t.buyer_email || t.email || '';
-
-      // Standard partial includes matching
-      const matchBuyer   = buyerVal.toLowerCase().includes(query);
-      const matchEmail   = emailVal.toLowerCase().includes(query);
-      const matchPromo   = promoFieldVal.toLowerCase().includes(query);
-      const matchMembers = membersStr.includes(query);
-      const matchSerial  = serialVal.toLowerCase().includes(query);
-      const matchPhone   = phoneVal.toLowerCase().includes(query);
-      const matchPayment = paymentVal.toLowerCase().includes(query);
-
-      // Last-4 / last-6 digit suffix matching for numeric-style fields
-      const matchSerialSuffix  = endsWithQuery(serialVal);
-      const matchPhoneSuffix   = endsWithQuery(phoneVal);
-      const matchPaymentSuffix = endsWithQuery(paymentVal);
-
-      // Also match against individual group member phones via suffix
-      let matchMemberPhoneSuffix = false;
-      if (Array.isArray(t.group_members)) {
-        matchMemberPhoneSuffix = t.group_members.some(m => endsWithQuery(m.phone || ''));
-      }
-
-      return (
-        matchBuyer || matchEmail || matchPromo || matchMembers ||
-        matchSerial || matchPhone || matchPayment ||
-        matchSerialSuffix || matchPhoneSuffix || matchPaymentSuffix ||
-        matchMemberPhoneSuffix
-      );
+      return matchesSearchQuery(t, searchQuery);
     });
   }, [tickets, searchQuery, selectedTierFilter, selectedPromoFilter]);
 
   // Door check quick match result
   const doorQuickMatch = useMemo(() => {
     if (!doorCheckSearch.trim()) return null;
-    const q = doorCheckSearch.trim().toLowerCase();
-    return tickets.find(t => 
-      (t.ticket_serial || t.serial_number || '').toLowerCase() === q ||
-      (t.buyer_phone || t.phone || '').replace(/[^0-9]/g, '') === q.replace(/[^0-9]/g, '')
-    );
+    return tickets.find(t => matchesSearchQuery(t, doorCheckSearch)) || null;
   }, [tickets, doorCheckSearch]);
 
   // Export gate list to CSV
@@ -530,7 +548,7 @@ export default function PassesAdminDashboard() {
                         VALID PASS MATCH ✓
                       </span>
                       <span className="font-mono text-sm font-black text-amber-400">
-                        {doorQuickMatch.serial_number || doorQuickMatch.confirmation_id}
+                        {doorQuickMatch.ticket_serial || doorQuickMatch.serial_number || doorQuickMatch.confirmation_id}
                       </span>
                     </div>
                     <p className="text-sm font-bold text-white">
@@ -543,14 +561,14 @@ export default function PassesAdminDashboard() {
 
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => toggleCheckIn(doorQuickMatch.serial_number || doorQuickMatch.confirmation_id)}
+                      onClick={() => toggleCheckIn(doorQuickMatch.ticket_serial || doorQuickMatch.serial_number || doorQuickMatch.confirmation_id)}
                       className={`px-4 py-2.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                        checkedInIds.has(doorQuickMatch.serial_number || doorQuickMatch.confirmation_id)
+                        checkedInIds.has(doorQuickMatch.ticket_serial || doorQuickMatch.serial_number || doorQuickMatch.confirmation_id)
                           ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
                           : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]'
                       }`}
                     >
-                      {checkedInIds.has(doorQuickMatch.serial_number || doorQuickMatch.confirmation_id)
+                      {checkedInIds.has(doorQuickMatch.ticket_serial || doorQuickMatch.serial_number || doorQuickMatch.confirmation_id)
                         ? 'Admitted ✓ (Click to Undo)'
                         : 'Admit Through Door'}
                     </button>
