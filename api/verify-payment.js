@@ -113,8 +113,8 @@ export default async function handler(req, res) {
         }
       });
 
-      // Strict user-specified columns
-      const strictRecord = {
+      // Strict verified ticket columns that exist in the Supabase tickets table
+      const ticketRecord = {
         ticket_serial: finalSerial,
         buyer_name: cleanBuyerName,
         buyer_email: cleanBuyerEmail,
@@ -128,40 +128,28 @@ export default async function handler(req, res) {
         group_members: cleanGroupMembers
       };
 
-      // Compatibility fields for legacy schemas
-      const compatibilityRecord = {
-        serial_number: finalSerial,
-        confirmation_id: finalSerial,
-        name: cleanBuyerName,
-        email: cleanBuyerEmail,
-        phone: cleanBuyerPhone,
-        discount_amount: numPromoDiscount,
-        payment_id: razorpay_payment_id || '',
-        order_id: razorpay_order_id || '',
-        quantity: cleanGroupMembers.length > 0 ? cleanGroupMembers.length : 1,
-        event_date: 'November 7th',
-        venue: 'Finn – The Luxury Club',
-        status: 'confirmed',
-        created_at: new Date().toISOString()
-      };
-
-      // Attempt unified insert containing both strict and compatibility fields
+      // Perform insert into tickets table matching exact schema
       let { error: insertError } = await supabase
         .from('tickets')
-        .insert([{ ...compatibilityRecord, ...strictRecord }]);
+        .insert([ticketRecord]);
 
-      // Fallback 1: If database schema only has the strict columns
-      if (insertError && (insertError.code === '42703' || insertError.message?.includes('column'))) {
-        console.warn('Unified insert column notice, trying strict schema:', insertError.message);
-        const retryStrict = await supabase.from('tickets').insert([strictRecord]);
-        insertError = retryStrict.error;
-
-        // Fallback 2: If database schema only has the legacy columns (e.g. serial_number instead of ticket_serial)
-        if (insertError && (insertError.code === '42703' || insertError.message?.includes('column'))) {
-          console.warn('Retrying with legacy column mapping:', insertError.message);
-          const retryLegacy = await supabase.from('tickets').insert([compatibilityRecord]);
-          insertError = retryLegacy.error;
-        }
+      // Graceful fallback if database table uses legacy 'serial_number' column instead of 'ticket_serial'
+      if (insertError && (insertError.code === 'PGRST204' || insertError.code === '42703' || insertError.message?.includes('column'))) {
+        console.warn('Strict column notice, attempting fallback insert:', insertError.message);
+        const legacyRecord = {
+          serial_number: finalSerial,
+          buyer_name: cleanBuyerName,
+          buyer_email: cleanBuyerEmail,
+          buyer_phone: cleanBuyerPhone,
+          pass_type: cleanPassType,
+          amount: numAmount,
+          discount_amount: numPromoDiscount,
+          payment_id: razorpay_payment_id || '',
+          order_id: razorpay_order_id || '',
+          group_members: cleanGroupMembers
+        };
+        const retryLegacy = await supabase.from('tickets').insert([legacyRecord]);
+        insertError = retryLegacy.error;
       }
 
       if (insertError) {

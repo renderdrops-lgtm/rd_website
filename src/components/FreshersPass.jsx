@@ -421,7 +421,6 @@ export default function FreshersPass({ onBackToHome }) {
         ...payload,
         ticket_serial: confirmedSerial,
         serial_number: confirmedSerial,
-        confirmation_id: confirmedSerial,
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),
@@ -437,9 +436,13 @@ export default function FreshersPass({ onBackToHome }) {
         created_at: new Date().toISOString()
       };
 
-      // Client-side Supabase write insurance in case server was in dev mode or RLS bypassed
+      // Client-side Supabase write insurance with strictly valid columns
       try {
-        await supabase.from('tickets').insert([confirmedRecord]);
+        const insertPayload = {
+          ...payload,
+          ticket_serial: confirmedSerial
+        };
+        await supabase.from('tickets').insert([insertPayload]);
       } catch (clientDbErr) {
         console.warn('Client-side Supabase write insurance note:', clientDbErr);
       }
