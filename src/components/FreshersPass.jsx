@@ -33,7 +33,7 @@ const PARTNER_LOGOS = [
   {
     name: 'RenderDrops',
     role: 'Official Digital Partner',
-    url: 'https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/rd_new.webp'
+    url: 'https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/rd.webp'
   },
   {
     name: 'Velvet Vault',
@@ -53,10 +53,16 @@ const PARTNER_LOGOS = [
 ];
 
 // Official Event Poster from Supabase Storage
-const SUPABASE_POSTER_STORAGE_URL = "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/official%20poster%20.webp";
+const SUPABASE_POSTER_STORAGE_URL = "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/official%20poster%20%20(1).webp";
 
-// Official Promo Code Specification
-const VALID_PROMO_CODE = 'TXJAS.AFTDARK7';
+// Official Promo Codes Specification (Eligible promo codes give ₹100 OFF)
+const VALID_PROMO_CODES = [
+  'VELVET-VIBE',
+  'GOLDENHOUR',
+  'AFTER.DARK',
+  'LUXE-ACCESS',
+  'TXJAS.AFTDARK7'
+];
 
 // Exact Pricing Tiers with Promo Discounts
 const PRICING_TIERS = [
@@ -65,17 +71,17 @@ const PRICING_TIERS = [
     title: 'Early Bird',
     badge: 'LIMITED ALLOCATION',
     badgeColor: 'amber',
-    price: 449,
-    promoDiscount: 50,
-    discountedPrice: 399,
+    price: 399,
+    promoDiscount: 100,
+    discountedPrice: 299,
     admits: 1,
-    perPerson: '₹449 / person',
-    description: 'Single entry for early risers. Limited allocation available.',
+    perPerson: '₹399 / person',
+    description: 'Special launch pricing available for the first 150 tickets.',
     perks: [
-      '1x General Admission',
-      'Access to Main Dancefloor',
-      'RenderDrops Aftermovie Feature',
-      'Official Entry Wristband'
+      'Special Launch Pricing',
+      'Available for the First 150 Tickets',
+      'DJ Sets & Live Entertainment',
+      'Official Event Aftermovie'
     ]
   },
   {
@@ -83,17 +89,17 @@ const PRICING_TIERS = [
     title: 'Stag Entry',
     badge: 'POPULAR',
     badgeColor: 'zinc',
-    price: 549,
-    promoDiscount: 50,
-    discountedPrice: 499,
+    price: 499,
+    promoDiscount: 100,
+    discountedPrice: 399,
     admits: 1,
-    perPerson: '₹549 / person',
-    description: 'Individual general access pass for guys or girls ready to party.',
+    perPerson: '₹499 / person',
+    description: 'Single-person party pass for the full Freshers celebration.',
     perks: [
-      '1x General Entry',
-      'Access to All Club Floors',
-      'Photo Booth & Media Wall Access',
-      'Official Aftermovie Tag'
+      'Single-Person Party Pass',
+      'Full Freshers Party Experience',
+      'Music, Entertainment & Celebrations',
+      'Event Photography & Cinematic Moments'
     ]
   },
   {
@@ -101,17 +107,17 @@ const PRICING_TIERS = [
     title: 'Couple Pass',
     badge: 'BEST VALUE',
     badgeColor: 'red',
-    price: 899,
-    promoDiscount: 50,
-    discountedPrice: 849,
+    price: 849,
+    promoDiscount: 100,
+    discountedPrice: 749,
     admits: 2,
-    perPerson: '₹450 / person',
-    description: 'One pass valid for 2 guests (1 Male + 1 Female or Pair).',
+    perPerson: '₹425 / person',
+    description: 'One pass valid for two attendees for a shared night out experience.',
     perks: [
-      'Entry for 2 Attendees',
-      'Priority Couple Queue Lane',
-      'Welcome Drink Shooters',
-      'Access to VIP Lounge Photo Spots'
+      'Entry for Two Attendees',
+      'A Shared Night Out Experience',
+      'Couple Photos & Memorable Moments',
+      'Music, Entertainment & Celebrations'
     ]
   },
   {
@@ -119,17 +125,17 @@ const PRICING_TIERS = [
     title: 'Group of 5',
     badge: 'CREW SAVINGS',
     badgeColor: 'amber',
-    price: 2700,
-    promoDiscount: 150,
-    discountedPrice: 2550,
+    price: 2550,
+    promoDiscount: 100,
+    discountedPrice: 2450,
     admits: 5,
-    perPerson: '₹540 / person',
-    description: 'Squad pass for a group of 5. Save big together with expedited entry.',
+    perPerson: '₹510 / person',
+    description: 'One squad pass for 5 friends to celebrate together and create shared memories.',
     perks: [
-      'Entry for 5 Friends',
-      'Expedited Group Entry Lane',
-      'Dedicated Table Allocation Priority',
-      'Special Crew Reel Shoutout'
+      'Entry for Five Friends',
+      'One Pass for the Whole Squad',
+      'Group Photos & Shared Memories',
+      'Celebrate Together, Create More Memories'
     ]
   },
   {
@@ -137,17 +143,17 @@ const PRICING_TIERS = [
     title: 'Group of 10',
     badge: 'VIP CREW',
     badgeColor: 'amber',
-    price: 5299,
-    promoDiscount: 349,
-    discountedPrice: 4950,
+    price: 4950,
+    promoDiscount: 100,
+    discountedPrice: 4850,
     admits: 10,
-    perPerson: '₹530 / person',
-    description: 'The ultimate crew pack. Bring the whole squad for maximum energy.',
+    perPerson: '₹495 / person',
+    description: 'One pass for your entire crew of 10 for an unforgettable celebration.',
     perks: [
-      'Entry for 10 Attendees',
-      'Exclusive Fast-Track VIP Lane',
-      'Priority Seating & Section Access',
-      'Dedicated Photographer Coverage Slot'
+      'Entry for Ten Attendees',
+      'One Pass for Your Entire Crew',
+      'Squad Photos & Group Moments',
+      'More Friends, One Unforgettable Celebration'
     ]
   }
 ];
@@ -243,8 +249,8 @@ export default function FreshersPass({ onBackToHome }) {
   }, [formData.name, formData.phone, selectedTier.admits]);
 
   // Calculate pricing & discount
-  const isPromoApplied = appliedPromo === VALID_PROMO_CODE;
-  const currentDiscount = isPromoApplied ? selectedTier.promoDiscount : 0;
+  const isPromoApplied = Boolean(appliedPromo && VALID_PROMO_CODES.includes(appliedPromo));
+  const currentDiscount = isPromoApplied ? (selectedTier.promoDiscount || 100) : 0;
   const finalPrice = Math.max(0, selectedTier.price - currentDiscount);
 
   // Promo code submission handler
@@ -258,7 +264,7 @@ export default function FreshersPass({ onBackToHome }) {
       return;
     }
 
-    if (cleanCode === VALID_PROMO_CODE) {
+    if (VALID_PROMO_CODES.includes(cleanCode)) {
       setAppliedPromo(cleanCode);
       setPromoError('');
     } else {
@@ -354,7 +360,7 @@ export default function FreshersPass({ onBackToHome }) {
       original_amount: selectedTier.price,
       amount: finalPrice,
       discount_amount: currentDiscount,
-      promo_code: isPromoApplied ? VALID_PROMO_CODE : null,
+      promo_code: isPromoApplied ? appliedPromo : null,
       payment_id: paymentId,
       order_id: orderId,
       group_members: finalGuestList,
@@ -416,7 +422,7 @@ export default function FreshersPass({ onBackToHome }) {
           receipt: `rcpt_${Date.now()}`,
           notes: {
             pass_tier: selectedTier.title,
-            promo_code: isPromoApplied ? VALID_PROMO_CODE : 'none',
+            promo_code: isPromoApplied ? appliedPromo : 'none',
             buyer_phone: formData.phone
           }
         })
@@ -437,7 +443,7 @@ export default function FreshersPass({ onBackToHome }) {
 
     if (isMockKey) {
       const confirmSim = window.confirm(
-        `[TEST MODE]\nRazorpay Merchant Key is currently set to placeholder (${keyId}).\n\nOrder Amount: ₹${finalPrice} (${amountInPaise} paise)\nPromo Code: ${isPromoApplied ? VALID_PROMO_CODE + ' (Applied)' : 'None'}\n\nProceed to simulate successful payment and generate your Digital Pass?`
+        `[TEST MODE]\nRazorpay Merchant Key is currently set to placeholder (${keyId}).\n\nOrder Amount: ₹${finalPrice} (${amountInPaise} paise)\nPromo Code: ${isPromoApplied ? appliedPromo + ' (Applied)' : 'None'}\n\nProceed to simulate successful payment and generate your Digital Pass?`
       );
 
       if (confirmSim) {
@@ -458,9 +464,9 @@ export default function FreshersPass({ onBackToHome }) {
       key: keyId,
       amount: amountInPaise,
       currency: 'INR',
-      name: 'RenderDrops Presents',
+      name: 'Freshers Party Pass',
       description: `Freshers Party Pass - ${selectedTier.title}${isPromoApplied ? ' (Promo Applied)' : ''}`,
-      image: 'https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/renderdrops.webp',
+      image: 'https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/rd.webp',
       order_id: serverOrderId || undefined,
       handler: async function (response) {
         if (response.razorpay_payment_id) {
@@ -496,7 +502,7 @@ export default function FreshersPass({ onBackToHome }) {
         venue: 'Finn – The Luxury Club',
         date: 'November 7th',
         admits: selectedTier.admits,
-        promo_code: isPromoApplied ? VALID_PROMO_CODE : 'NONE'
+        promo_code: isPromoApplied ? appliedPromo : 'NONE'
       },
       theme: {
         color: '#E31B2E',
@@ -821,11 +827,6 @@ export default function FreshersPass({ onBackToHome }) {
         
         {/* ── Section 1: Hero Showcase & Event Presentation ── */}
         <div className="text-center max-w-3xl mx-auto space-y-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/10 via-red-600/10 to-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold tracking-[0.25em] uppercase">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>RENDERDROPS PRESENTS</span>
-          </div>
-
           <h1 className="font-display uppercase tracking-tight text-white leading-[0.9] text-5xl sm:text-7xl lg:text-8xl">
             THE FRESHERS <br />
             <span className="bg-gradient-to-r from-amber-300 via-amber-500 to-amber-200 bg-clip-text text-transparent">
@@ -834,7 +835,7 @@ export default function FreshersPass({ onBackToHome }) {
           </h1>
 
           <p className="text-zinc-400 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-            Bangalore's biggest freshers day party. A high-energy afternoon celebration with state-of-the-art sound, kinetic laser fixtures, signature red carpet entrance, commercial hip-hop sets, and official RenderDrops cinematic after-movie shoot.
+            Step into an unforgettable Freshers Party experience with an electrifying atmosphere, state-of-the-art sound, stunning laser effects, and an exclusive cinematic aftermovie by RenderDrops. A day of music, energy, and memories worth keeping.
           </p>
 
           {/* Key Event Specs Grid */}
@@ -993,7 +994,7 @@ export default function FreshersPass({ onBackToHome }) {
 
         {/* ── Section 4: Pricing Tiers Grid with Promo Code ── */}
         <div id="passes">
-          <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
+          <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
             <span className="text-xs font-mono uppercase tracking-[0.3em] text-amber-400">
               // SELECT YOUR ACCESS LEVEL
             </span>
@@ -1003,6 +1004,14 @@ export default function FreshersPass({ onBackToHome }) {
             <p className="text-zinc-400 text-sm">
               All passes include entrance, wristband, club floor privileges, and digital confirmation pass.
             </p>
+
+            {/* High-visibility green promotional badge before user applies code */}
+            <div className="pt-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
+                <Tag className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>PROMO OFFER: Apply an eligible promo code to get ₹100 OFF your pass!</span>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
@@ -1153,12 +1162,20 @@ export default function FreshersPass({ onBackToHome }) {
                 <span>Have a Promo Code?</span>
               </label>
 
+              {/* High-visibility green promotional badge before user applies code */}
+              {!isPromoApplied && (
+                <div className="mb-3 p-3 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center gap-2.5">
+                  <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
+                  <span>Applying an eligible promo code gives you <strong>₹100 OFF</strong> instantly!</span>
+                </div>
+              )}
+
               {isPromoApplied ? (
                 <div className="bg-emerald-950/50 border border-emerald-500/50 rounded-xl p-3 flex items-center justify-between text-xs font-mono">
                   <div className="flex items-center gap-2 text-emerald-400">
                     <CheckCircle2 className="w-4 h-4 shrink-0" />
                     <span>
-                      Code <strong>{VALID_PROMO_CODE}</strong> Applied! (-₹{currentDiscount} off)
+                      Code <strong>{appliedPromo}</strong> Applied! (-₹{currentDiscount} off)
                     </span>
                   </div>
                   <button

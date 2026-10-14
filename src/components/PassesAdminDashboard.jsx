@@ -117,15 +117,31 @@ export default function PassesAdminDashboard() {
     localStorage.setItem('rd_gate_checked_in', JSON.stringify(Array.from(next)));
   };
 
+  const TRACKED_PROMO_CODES = ['VELVET-VIBE', 'GOLDENHOUR', 'AFTER.DARK', 'LUXE-ACCESS', 'TXJAS.AFTDARK7'];
+
   // Compute live analytics
   const analytics = useMemo(() => {
     const totalRev = tickets.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
     const totalAdmit = tickets.reduce((sum, t) => sum + (Number(t.quantity) || 1), 0);
     
-    // Promo TXJAS.AFTDARK7 specific metrics
-    const txjasTickets = tickets.filter(t => (t.promo_code || '').toUpperCase() === 'TXJAS.AFTDARK7');
-    const txjasCount = txjasTickets.length;
-    const txjasDiscountSaved = txjasTickets.reduce((sum, t) => sum + (Number(t.discount_amount) || 0), 0);
+    // Promo codes aggregation & analytics
+    const promoBreakdown = {};
+    TRACKED_PROMO_CODES.forEach(code => {
+      promoBreakdown[code] = { count: 0, discount: 0, revenue: 0 };
+    });
+
+    tickets.forEach(t => {
+      if (t.promo_code) {
+        const code = String(t.promo_code).trim().toUpperCase();
+        if (!promoBreakdown[code]) {
+          promoBreakdown[code] = { count: 0, discount: 0, revenue: 0 };
+        }
+        promoBreakdown[code].count += 1;
+        promoBreakdown[code].discount += (Number(t.discount_amount) || 0);
+        promoBreakdown[code].revenue += (Number(t.amount) || 0);
+      }
+    });
+
     const totalPromoUsed = tickets.filter(t => t.promo_code).length;
     const totalDiscountSaved = tickets.reduce((sum, t) => sum + (Number(t.discount_amount) || 0), 0);
 
@@ -153,8 +169,7 @@ export default function PassesAdminDashboard() {
       totalAdmit,
       totalPromoUsed,
       totalDiscountSaved,
-      txjasCount,
-      txjasDiscountSaved,
+      promoBreakdown,
       tiers,
       checkedInCount: checkedInIds.size
     };
@@ -172,6 +187,9 @@ export default function PassesAdminDashboard() {
       // Promo filter
       if (selectedPromoFilter === 'WITH_PROMO' && !t.promo_code) return false;
       if (selectedPromoFilter === 'NO_PROMO' && t.promo_code) return false;
+      if (selectedPromoFilter !== 'ALL' && selectedPromoFilter !== 'WITH_PROMO' && selectedPromoFilter !== 'NO_PROMO') {
+        if ((t.promo_code || '').trim().toUpperCase() !== selectedPromoFilter) return false;
+      }
 
       if (!query) return true;
 
@@ -580,83 +598,108 @@ export default function PassesAdminDashboard() {
 
         </div>
 
-        {/* ── Section 2.5: Breakdown by Pass Type & TXJAS.AFTDARK7 Promo Metrics ── */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
-            <span className="uppercase tracking-wider font-bold text-white flex items-center gap-1.5">
-              <Ticket className="w-3.5 h-3.5 text-amber-400" />
-              BREAKDOWN BY PASS TYPE & PROMO
-            </span>
-            <span className="text-[11px] text-zinc-500 font-mono">
-              Live Categories • Finn Nov 7th
-            </span>
+        {/* ── Section 2.5: Breakdown by Pass Type & Promo Code Analytics ── */}
+        <div className="space-y-6">
+          {/* 1. Pass Type Breakdown */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+              <span className="uppercase tracking-wider font-bold text-white flex items-center gap-1.5">
+                <Ticket className="w-3.5 h-3.5 text-amber-400" />
+                PASS CATEGORY BREAKDOWN
+              </span>
+              <span className="text-[11px] text-zinc-500 font-mono">
+                Live Categories • Finn Nov 7th
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 font-mono text-xs">
+              {/* Early Bird */}
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+                <span className="text-[10px] text-zinc-400 font-bold block uppercase">Early Bird</span>
+                <div className="text-xl font-bold text-white">
+                  {analytics.tiers['Early Bird']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
+                </div>
+                <div className="text-[11px] text-amber-400">
+                  ₹{(analytics.tiers['Early Bird']?.revenue || 0).toLocaleString('en-IN')}
+                </div>
+              </div>
+
+              {/* Stag Entry */}
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+                <span className="text-[10px] text-zinc-400 font-bold block uppercase">Stag Entry</span>
+                <div className="text-xl font-bold text-white">
+                  {analytics.tiers['Stag Entry']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
+                </div>
+                <div className="text-[11px] text-amber-400">
+                  ₹{(analytics.tiers['Stag Entry']?.revenue || 0).toLocaleString('en-IN')}
+                </div>
+              </div>
+
+              {/* Couple Pass */}
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+                <span className="text-[10px] text-zinc-400 font-bold block uppercase">Couple Pass</span>
+                <div className="text-xl font-bold text-white">
+                  {analytics.tiers['Couple Pass']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
+                </div>
+                <div className="text-[11px] text-amber-400">
+                  ₹{(analytics.tiers['Couple Pass']?.revenue || 0).toLocaleString('en-IN')}
+                </div>
+              </div>
+
+              {/* Group of 5 */}
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+                <span className="text-[10px] text-zinc-400 font-bold block uppercase">Group of 5</span>
+                <div className="text-xl font-bold text-white">
+                  {analytics.tiers['Group of 5']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
+                </div>
+                <div className="text-[11px] text-amber-400">
+                  ₹{(analytics.tiers['Group of 5']?.revenue || 0).toLocaleString('en-IN')}
+                </div>
+              </div>
+
+              {/* Group of 10 */}
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+                <span className="text-[10px] text-zinc-400 font-bold block uppercase">Group of 10</span>
+                <div className="text-xl font-bold text-white">
+                  {analytics.tiers['Group of 10']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
+                </div>
+                <div className="text-[11px] text-amber-400">
+                  ₹{(analytics.tiers['Group of 10']?.revenue || 0).toLocaleString('en-IN')}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 font-mono text-xs">
-            {/* Early Bird */}
-            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
-              <span className="text-[10px] text-zinc-400 font-bold block uppercase">Early Bird</span>
-              <div className="text-xl font-bold text-white">
-                {analytics.tiers['Early Bird']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
-              </div>
-              <div className="text-[11px] text-amber-400">
-                ₹{(analytics.tiers['Early Bird']?.revenue || 0).toLocaleString('en-IN')}
-              </div>
+          {/* 2. Promo Codes Performance Grid */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+              <span className="uppercase tracking-wider font-bold text-emerald-400 flex items-center gap-1.5">
+                <Percent className="w-3.5 h-3.5 text-emerald-400" />
+                PROMO CODE PERFORMANCE & REDEMPTIONS
+              </span>
+              <span className="text-[11px] text-zinc-500 font-mono">
+                {analytics.totalPromoUsed} Total Redemptions (-₹{analytics.totalDiscountSaved.toLocaleString('en-IN')} Saved)
+              </span>
             </div>
 
-            {/* Stag Entry */}
-            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
-              <span className="text-[10px] text-zinc-400 font-bold block uppercase">Stag Entry</span>
-              <div className="text-xl font-bold text-white">
-                {analytics.tiers['Stag Entry']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
-              </div>
-              <div className="text-[11px] text-amber-400">
-                ₹{(analytics.tiers['Stag Entry']?.revenue || 0).toLocaleString('en-IN')}
-              </div>
-            </div>
-
-            {/* Couple Pass */}
-            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
-              <span className="text-[10px] text-zinc-400 font-bold block uppercase">Couple Pass</span>
-              <div className="text-xl font-bold text-white">
-                {analytics.tiers['Couple Pass']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
-              </div>
-              <div className="text-[11px] text-amber-400">
-                ₹{(analytics.tiers['Couple Pass']?.revenue || 0).toLocaleString('en-IN')}
-              </div>
-            </div>
-
-            {/* Group of 5 */}
-            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
-              <span className="text-[10px] text-zinc-400 font-bold block uppercase">Group of 5</span>
-              <div className="text-xl font-bold text-white">
-                {analytics.tiers['Group of 5']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
-              </div>
-              <div className="text-[11px] text-amber-400">
-                ₹{(analytics.tiers['Group of 5']?.revenue || 0).toLocaleString('en-IN')}
-              </div>
-            </div>
-
-            {/* Group of 10 */}
-            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 space-y-1">
-              <span className="text-[10px] text-zinc-400 font-bold block uppercase">Group of 10</span>
-              <div className="text-xl font-bold text-white">
-                {analytics.tiers['Group of 10']?.count || 0} <span className="text-xs text-zinc-500 font-normal">passes</span>
-              </div>
-              <div className="text-[11px] text-amber-400">
-                ₹{(analytics.tiers['Group of 10']?.revenue || 0).toLocaleString('en-IN')}
-              </div>
-            </div>
-
-            {/* Promo TXJAS.AFTDARK7 */}
-            <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-3.5 space-y-1">
-              <span className="text-[10px] text-emerald-400 font-bold block uppercase truncate">TXJAS.AFTDARK7</span>
-              <div className="text-xl font-bold text-emerald-400">
-                {analytics.txjasCount} <span className="text-xs text-emerald-500/70 font-normal">used</span>
-              </div>
-              <div className="text-[11px] text-zinc-400">
-                -₹{analytics.txjasDiscountSaved.toLocaleString('en-IN')} saved
-              </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 font-mono text-xs">
+              {Object.keys(analytics.promoBreakdown).map((code) => {
+                const data = analytics.promoBreakdown[code];
+                return (
+                  <div key={code} className="bg-emerald-950/20 border border-emerald-500/25 rounded-xl p-3.5 space-y-1">
+                    <span className="text-[10px] text-emerald-400 font-bold block uppercase truncate" title={code}>
+                      {code}
+                    </span>
+                    <div className="text-xl font-bold text-emerald-300">
+                      {data.count} <span className="text-xs text-emerald-500/70 font-normal">used</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] text-zinc-400 pt-0.5">
+                      <span>-₹{(data.discount || 0).toLocaleString('en-IN')}</span>
+                      <span className="text-zinc-500">₹{(data.revenue || 0).toLocaleString('en-IN')} rev</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -700,8 +743,13 @@ export default function PassesAdminDashboard() {
                 className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs font-mono rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-400"
               >
                 <option value="ALL">All Promo Status</option>
-                <option value="WITH_PROMO">With Promo Code</option>
+                <option value="WITH_PROMO">With Any Promo</option>
                 <option value="NO_PROMO">No Promo Code</option>
+                <option value="VELVET-VIBE">Code: VELVET-VIBE</option>
+                <option value="GOLDENHOUR">Code: GOLDENHOUR</option>
+                <option value="AFTER.DARK">Code: AFTER.DARK</option>
+                <option value="LUXE-ACCESS">Code: LUXE-ACCESS</option>
+                <option value="TXJAS.AFTDARK7">Code: TXJAS.AFTDARK7</option>
               </select>
             </div>
 
