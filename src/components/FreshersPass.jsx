@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import html2canvas from 'html2canvas';
 import { 
   ArrowLeft, 
   Calendar, 
@@ -200,6 +201,7 @@ export default function FreshersPass({ onBackToHome }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
   const [confirmedTicket, setConfirmedTicket] = useState(null);
+  const [downloadMessage, setDownloadMessage] = useState('');
   const [posterLoaded, setPosterLoaded] = useState(false);
   const [posterError, setPosterError] = useState(false);
 
@@ -558,8 +560,73 @@ export default function FreshersPass({ onBackToHome }) {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async () => {
+    setDownloadMessage('');
+    const passCard = document.getElementById('digital-pass-card');
+
+    if (!passCard) {
+      console.error('Digital pass download failed: #digital-pass-card was not found.');
+      setDownloadMessage('Could not find the digital pass. Please refresh and try again.');
+      return;
+    }
+
+    let mobilePreview = null;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+      // Reserve a user-initiated tab before awaiting canvas rendering; iOS may block later popups.
+      mobilePreview = window.open('', '_blank');
+    }
+
+    try {
+      const canvas = await html2canvas(passCard, {
+        useCORS: true,
+        allowTaint: false,
+        logging: false
+      });
+      const imageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+
+      if (!imageBlob) {
+        throw new Error('The browser could not create a PNG image from the pass.');
+      }
+
+      const imageUrl = URL.createObjectURL(imageBlob);
+      const filename = `${confirmedTicket.serial_number || confirmedTicket.confirmation_id || 'digital-pass'}.png`;
+
+      if (mobilePreview && !mobilePreview.closed) {
+        mobilePreview.location.href = imageUrl;
+        setDownloadMessage('Pass image opened in a new tab. Use your browser’s Share or Save option to keep it.');
+      } else if ('download' in document.createElement('a')) {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = imageUrl;
+        downloadLink.download = filename;
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+        setDownloadMessage('Your digital pass image is downloading.');
+      } else {
+        URL.revokeObjectURL(imageUrl);
+        throw new Error('This browser does not support direct image downloads.');
+      }
+
+      // Keep the URL alive long enough for mobile browsers to open or save the image.
+      window.setTimeout(() => URL.revokeObjectURL(imageUrl), 60000);
+    } catch (error) {
+      if (mobilePreview && !mobilePreview.closed) {
+        mobilePreview.close();
+      }
+      console.error('Digital pass image download failed; opening print fallback:', error);
+      setDownloadMessage('Image download was unavailable. Use the print dialog to print or save the pass as a PDF.');
+
+      document.body.classList.add('printing-digital-pass');
+      const cleanupPrintStyle = () => {
+        document.body.classList.remove('printing-digital-pass');
+      };
+      window.addEventListener('afterprint', cleanupPrintStyle, { once: true });
+      window.requestAnimationFrame(() => window.print());
+    }
   };
 
   const handleReturnHome = () => {
@@ -775,7 +842,7 @@ export default function FreshersPass({ onBackToHome }) {
               className="flex-1 py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold uppercase tracking-wider text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_25px_rgba(245,158,11,0.3)] cursor-pointer"
             >
               <Download className="w-4 h-4" />
-              <span>Download / Print Digital Pass</span>
+              <span>Download Pass Image / Print</span>
             </button>
             <button
               onClick={() => {
@@ -789,6 +856,11 @@ export default function FreshersPass({ onBackToHome }) {
               Book Another Pass
             </button>
           </div>
+          {downloadMessage && (
+            <p role="status" className="mt-3 text-center text-xs font-mono text-zinc-400">
+              {downloadMessage}
+            </p>
+          )}
 
         </div>
       </div>
