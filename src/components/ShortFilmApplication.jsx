@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X, ArrowRight } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const ROLES = ['Actor / Actress', 'Director / Assistant Director', 'Spot Corrector'];
 const AVAILABILITY = ['Weekdays', 'Weekends', 'Both'];
@@ -26,8 +27,29 @@ const CLAPPER_STRIPES = {
     'repeating-linear-gradient(-55deg, #141414 0 22px, #F4F1EC 22px 44px)',
 };
 
-// The server (api/send-application.js) turns the application into a PDF and
-// emails it to the RenderDrops inbox. Nothing is stored anywhere else.
+// Every application is saved in the Supabase table `short_film_applications`
+// (view it in Supabase → Table Editor) and also emailed to the RenderDrops inbox.
+async function saveApplication(a) {
+  const { error } = await supabase.from('short_film_applications').insert([
+    {
+      full_name: a.fullName,
+      srn: a.srn,
+      contact: a.whatsapp,
+      branch: a.branch,
+      roles: a.roles,
+      languages: a.languages,
+      experience: a.experience,
+      work_link: a.workLink || null,
+      why_join: a.whyJoin || null,
+      availability: a.availability,
+      can_travel: a.canTravel === 'Yes',
+      submitted_at: new Date().toISOString(),
+    },
+  ]);
+  if (error) throw error;
+}
+
+// The server (api/send-application.js) emails the application to the RenderDrops inbox.
 async function sendApplication(application) {
   const res = await fetch('/api/send-application', {
     method: 'POST',
@@ -220,23 +242,36 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
     }
 
     setStatus('sending');
-    try {
-      await sendApplication({
-        fullName: form.fullName.trim(),
-        srn: form.srn.trim().replace(/\s+/g, ''),
-        whatsapp: normalizeWhatsApp(form.contact),
-        branch: form.branch.trim(),
-        roles: form.roles,
-        languages: form.languages,
-        experience: form.experience.trim(),
-        workLink: form.workLink.trim(),
-        whyJoin: form.whyJoin.trim(),
-        availability: form.availability,
-        canTravel: form.canTravel,
-        website: honeypotRef.current?.value || '',
-      });
-    } catch (err) {
-      console.error('Sending application failed:', err.message);
+    const application = {
+      fullName: form.fullName.trim(),
+      srn: form.srn.trim().replace(/\s+/g, ''),
+      whatsapp: normalizeWhatsApp(form.contact),
+      branch: form.branch.trim(),
+      roles: form.roles,
+      languages: form.languages,
+      experience: form.experience.trim(),
+      workLink: form.workLink.trim(),
+      whyJoin: form.whyJoin.trim(),
+      availability: form.availability,
+      canTravel: form.canTravel,
+    };
+    const isBot = Boolean(honeypotRef.current?.value);
+
+    // Email it and save it to Supabase at the same time
+    const [emailResult, saveResult] = await Promise.allSettled([
+      sendApplication({ ...application, website: honeypotRef.current?.value || '' }),
+      isBot ? Promise.resolve() : saveApplication(application),
+    ]);
+
+    if (emailResult.status === 'rejected') {
+      console.error('Emailing application failed:', emailResult.reason?.message);
+    }
+    if (saveResult.status === 'rejected') {
+      console.error('Saving application to Supabase failed:', saveResult.reason?.message);
+    }
+
+    // As long as one copy reached us, the applicant is done
+    if (emailResult.status === 'rejected' && saveResult.status === 'rejected') {
       setStatus('error');
       return;
     }
