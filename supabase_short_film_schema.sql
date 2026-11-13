@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.short_film_applications (
   contact TEXT NOT NULL,
   branch TEXT NOT NULL,
   roles TEXT[] NOT NULL DEFAULT '{}',
+  languages TEXT[] NOT NULL DEFAULT '{}',
   experience TEXT NOT NULL,
   work_link TEXT,
   why_join TEXT,
@@ -16,6 +17,9 @@ CREATE TABLE IF NOT EXISTS public.short_film_applications (
   can_travel BOOLEAN NOT NULL,
   submitted_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Safe to re-run: adds columns introduced after the table was first created
+ALTER TABLE public.short_film_applications ADD COLUMN IF NOT EXISTS languages TEXT[] NOT NULL DEFAULT '{}';
 
 ALTER TABLE public.short_film_applications ENABLE ROW LEVEL SECURITY;
 

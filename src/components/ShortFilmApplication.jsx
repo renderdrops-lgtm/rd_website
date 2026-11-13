@@ -5,12 +5,14 @@ import { supabase } from '../lib/supabase';
 const ROLES = ['Actor / Actress', 'Director / Assistant Director', 'Spot Corrector'];
 const AVAILABILITY = ['Weekdays', 'Weekends', 'Both'];
 const TRAVEL = ['Yes', 'No'];
+const LANGUAGES = ['Tamil', 'Telugu', 'Kannada', 'English', 'Hindi', 'Malayalam'];
 
 const EMPTY_FORM = {
   fullName: '',
   contact: '',
   branch: '',
   roles: [],
+  languages: [],
   experience: '',
   workLink: '',
   whyJoin: '',
@@ -30,6 +32,7 @@ function validate(form) {
   if (!form.contact.trim()) e.contact = 'We need some way to reach you';
   if (!form.branch.trim()) e.branch = 'Add your branch';
   if (!form.roles.length) e.roles = 'Pick at least one role';
+  if (!form.languages.length) e.languages = 'Pick at least one language';
   if (!form.experience.trim()) e.experience = 'One line is enough, even "none yet"';
   if (!form.workLink.trim() && !form.whyJoin.trim()) {
     e.work = 'Drop a link, or tell us why you want to join';
@@ -187,6 +190,7 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
       contact: form.contact.trim(),
       branch: form.branch.trim(),
       roles: form.roles,
+      languages: form.languages,
       experience: form.experience.trim(),
       work_link: form.workLink.trim() || null,
       why_join: form.whyJoin.trim() || null,
@@ -354,8 +358,21 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
                   </ChoiceRow>
                 </Section>
 
+                <Section num="02" title="Which languages can you work in?" hint="Pick all that apply.">
+                  <ChoiceRow error={errors.languages}>
+                    {LANGUAGES.map((l) => (
+                      <Choice
+                        key={l}
+                        label={l}
+                        selected={form.languages.includes(l)}
+                        onClick={() => toggle('languages', l)}
+                      />
+                    ))}
+                  </ChoiceRow>
+                </Section>
+
                 <Section
-                  num="02"
+                  num="03"
                   title="What experience do you have?"
                   hint={'Films, college projects, reels, or "none yet, but I\'m keen to learn".'}
                 >
@@ -369,7 +386,7 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
                 </Section>
 
                 <Section
-                  num="03"
+                  num="04"
                   title="Share your best work, or tell us why you want to join"
                   hint="A YouTube, Instagram or Drive link works. No work yet? Write 2–3 lines on why you want in."
                 >
@@ -392,7 +409,7 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
                   </div>
                 </Section>
 
-                <Section num="04" title="When and where are you available?">
+                <Section num="05" title="When and where are you available?">
                   <div className="space-y-5">
                     <ChoiceRow label="Availability" error={errors.availability}>
                       {AVAILABILITY.map((a) => (
