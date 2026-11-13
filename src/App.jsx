@@ -88,7 +88,7 @@ function App() {
       <CustomCursor />
 
       {/* Navigation */}
-      <Navbar onOpenRecruitment={handleOpenJoinDirectly} />
+      <Navbar onOpenRecruitment={handleOpenJoinDirectly} onOpenFilmCall={() => setIsFilmOpen(true)} />
 
       <main>
         <Hero onOpenFilmCall={() => setIsFilmOpen(true)} />

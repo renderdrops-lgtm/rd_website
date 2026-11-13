@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Menu, X, ArrowUpRight, Sparkles } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 
-export default function Navbar({ onOpenRecruitment }) {
+export default function Navbar({ onOpenRecruitment, onOpenFilmCall }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -48,6 +48,25 @@ export default function Navbar({ onOpenRecruitment }) {
 
           {/* CTAs + Mobile Toggle */}
           <div className="flex items-center gap-2.5 sm:gap-3">
+
+            {/* Short Film casting call: opens the crew & cast application popup */}
+            {onOpenFilmCall && (
+              <button
+                type="button"
+                onClick={onOpenFilmCall}
+                className="inline-flex items-stretch bg-rd-offwhite hover:bg-white text-rd-dark-text text-[11px] sm:text-xs font-extrabold tracking-widest uppercase transition-colors duration-300"
+              >
+                <span
+                  aria-hidden="true"
+                  className="w-3 sm:w-4 shrink-0"
+                  style={{ backgroundImage: 'repeating-linear-gradient(-55deg, #141414 0 4px, #F4F1EC 4px 8px)' }}
+                />
+                <span className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-rd-red" />
+                  <span>SHORT FILM</span>
+                </span>
+              </button>
+            )}
 
             {/* Join Us / Recruitment Button */}
             <button
