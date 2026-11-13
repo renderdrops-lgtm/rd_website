@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, Trash2, ShieldAlert, ArrowLeft, RefreshCw } from 'lucide-react';
-import CustomCursor from './CustomCursor';
 import { supabase } from '../lib/supabase';
 
 export default function AdminDashboard() {
@@ -83,7 +82,6 @@ export default function AdminDashboard() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4 sm:px-6 relative overflow-hidden select-none">
-        <CustomCursor />
         <div className="absolute w-full max-w-[500px] h-[300px] bg-red-600/10 blur-[140px] pointer-events-none rounded-full" />
 
         <div className="max-w-md w-full bg-zinc-900/90 border border-zinc-800 p-6 sm:p-8 rounded-2xl shadow-2xl relative z-10">
@@ -137,7 +135,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-4 sm:p-6 md:p-12 relative overflow-x-clip">
-      <CustomCursor />
 
       <div className="max-w-7xl mx-auto relative z-10">
         

@@ -23,7 +23,6 @@ import {
   X
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import CustomCursor from './CustomCursor';
 
 export default function PassesAdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -331,7 +330,6 @@ export default function PassesAdminDashboard() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-zinc-950 flex flex-col justify-center items-center px-4 selection:bg-amber-500 selection:text-black">
-        <CustomCursor />
         
         {/* Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-amber-500/10 blur-[150px] pointer-events-none rounded-full" />
@@ -400,7 +398,6 @@ export default function PassesAdminDashboard() {
   // ─────────────────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-zinc-950 text-white selection:bg-amber-500 selection:text-black pb-20">
-      <CustomCursor />
 
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-xl border-b border-amber-500/20 py-4 px-4 sm:px-8">

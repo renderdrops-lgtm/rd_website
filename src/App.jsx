@@ -11,7 +11,6 @@ import CollectiveSection from './components/CollectiveSection';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import ScrollReveal from './components/ScrollReveal';
-import CustomCursor from './components/CustomCursor';
 import RecruitmentSection from './components/RecruitmentSection';
 import AdminDashboard from './components/AdminDashboard';
 import PassesAdminDashboard from './components/PassesAdminDashboard';
@@ -84,8 +83,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-rd-black text-white relative overflow-x-clip">
-      {/* Premium Custom Cursor */}
-      <CustomCursor />
 
       {/* Navigation */}
       <Navbar onOpenRecruitment={handleOpenJoinDirectly} onOpenFilmCall={() => setIsFilmOpen(true)} />
