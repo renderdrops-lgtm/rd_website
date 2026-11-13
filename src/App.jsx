@@ -128,7 +128,7 @@ function App() {
       <Navbar onOpenRecruitment={handleOpenJoinDirectly} />
 
       <main>
-        <Hero />
+        <Hero onOpenFilmCall={() => setIsFilmOpen(true)} />
         <MarqueeBanner />
         <ScrollReveal delay={60}>
           <WorkSection />

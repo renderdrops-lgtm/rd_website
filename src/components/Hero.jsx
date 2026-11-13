@@ -33,7 +33,7 @@ function CyclingWord() {
 }
 
 /* ─── Hero ───────────────────────────────────────────────────────────────── */
-export default function Hero() {
+export default function Hero({ onOpenFilmCall }) {
   const contentRef = useRef(null);
   const rafRef = useRef(null);
   const scrollYRef = useRef(0);
@@ -160,7 +160,7 @@ export default function Hero() {
         </p>
 
         {/* CTAs */}
-        <div className="animate-fade-in-up-4 flex flex-col sm:flex-row items-stretch sm:items-start gap-3 sm:gap-4 w-full sm:w-auto">
+        <div className="animate-fade-in-up-4 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-start gap-3 sm:gap-4 w-full sm:w-auto">
           <a
             href="#work"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-rd-red hover:bg-rd-red-hover text-white text-xs sm:text-sm font-extrabold tracking-widest uppercase transition-all duration-300 shadow-[0_0_35px_rgba(227,27,46,0.55)] hover:shadow-[0_0_60px_rgba(227,27,46,0.9)] shimmer-btn group"
@@ -175,6 +175,25 @@ export default function Hero() {
             <span>WORK WITH US</span>
             <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
+          {onOpenFilmCall && (
+            <button
+              type="button"
+              onClick={onOpenFilmCall}
+              className="w-full sm:w-auto inline-flex items-stretch bg-rd-offwhite hover:bg-white text-rd-dark-text text-xs sm:text-sm font-extrabold tracking-widest uppercase transition-colors duration-300 group"
+            >
+              {/* Clapperboard edge, same as the casting popup */}
+              <span
+                aria-hidden="true"
+                className="w-5 sm:w-6 shrink-0"
+                style={{ backgroundImage: 'repeating-linear-gradient(-55deg, #141414 0 6px, #F4F1EC 6px 12px)' }}
+              />
+              <span className="flex flex-1 items-center justify-center gap-2 px-5 sm:px-6 py-3.5 sm:py-4">
+                <span className="h-1.5 w-1.5 rounded-full bg-rd-red" />
+                <span>SHORT FILM CASTING</span>
+                <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Decorative bottom-right stat badge */}
