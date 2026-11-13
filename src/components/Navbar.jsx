@@ -48,16 +48,6 @@ export default function Navbar({ onOpenRecruitment }) {
 
           {/* CTAs + Mobile Toggle */}
           <div className="flex items-center gap-2.5 sm:gap-3">
-            
-            {/* Freshers Party Pass Clean Navbar Badge */}
-            <a
-              href="/freshers-pass"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-red-600/15 to-amber-500/15 border border-amber-500/40 text-amber-300 hover:text-white hover:border-amber-400 text-[10px] sm:text-[11px] font-black tracking-wider uppercase transition-all duration-300 shadow-[0_0_15px_rgba(245,158,11,0.2)] group"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-              <span>FRESHERS PASS</span>
-              <span className="text-[10px]">🎟️</span>
-            </a>
 
             {/* Join Us / Recruitment Button */}
             <button
@@ -105,15 +95,6 @@ export default function Navbar({ onOpenRecruitment }) {
                 <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:text-rd-red transition-all" />
               </a>
             ))}
-            
-            {/* Mobile Freshers Party Pass Button */}
-            <a
-              href="/freshers-pass"
-              onClick={() => setMobileMenuOpen(false)}
-              className="mt-3 w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-amber-500/20 via-zinc-900 to-amber-500/20 border border-amber-500/60 text-amber-300 text-xs font-extrabold tracking-widest uppercase transition-all duration-200 shadow-[0_0_20px_rgba(245,158,11,0.25)]"
-            >
-              <span>🎟️ FRESHERS PARTY PASS (NOV 7)</span>
-            </a>
 
             {/* Mobile Recruitment Button */}
             <button

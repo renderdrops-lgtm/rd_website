@@ -386,19 +386,8 @@ export default function PassesAdminDashboard() {
           </form>
 
           <div className="mt-8 pt-6 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono text-zinc-500">
-            <a 
-              href="/freshers-pass" 
-              onClick={(e) => {
-                e.preventDefault();
-                window.history.pushState({}, '', '/freshers-pass');
-                window.dispatchEvent(new PopStateEvent('popstate'));
-              }}
-              className="hover:text-amber-400 transition-colors flex items-center gap-1"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" /> Back to Freshers Pass
-            </a>
-            <a href="/" className="hover:text-zinc-300 transition-colors">
-              Studio Home →
+            <a href="/" className="hover:text-amber-400 transition-colors flex items-center gap-1">
+              <ArrowLeft className="w-3.5 h-3.5" /> Studio Home
             </a>
           </div>
         </div>
@@ -455,16 +444,11 @@ export default function PassesAdminDashboard() {
             </button>
 
             <a
-              href="/freshers-pass"
-              onClick={(e) => {
-                e.preventDefault();
-                window.history.pushState({}, '', '/freshers-pass');
-                window.dispatchEvent(new PopStateEvent('popstate'));
-              }}
+              href="/"
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-400 hover:text-white transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Passes</span>
+              <span>Studio Home</span>
             </a>
 
             <button

@@ -15,23 +15,23 @@ import CustomCursor from './components/CustomCursor';
 import RecruitmentSection from './components/RecruitmentSection';
 import AdminDashboard from './components/AdminDashboard';
 import PassesAdminDashboard from './components/PassesAdminDashboard';
-import FreshersPass from './components/FreshersPass';
 import ShortFilmApplication from './components/ShortFilmApplication';
 
 const FILM_POPUP_SEEN_KEY = 'rd_film_popup_seen';
-import { ArrowUpRight } from 'lucide-react';
+
+// The Freshers Party Pass page has been retired; old links land on the homepage
+const RETIRED_PATHS = ['/freshers-pass', '/freshers'];
 
 function App() {
   const [isAdminRoute, setIsAdminRoute] = useState(false);
   const [isPassesAdminRoute, setIsPassesAdminRoute] = useState(false);
-  const [isFreshersRoute, setIsFreshersRoute] = useState(false);
   const [isRecruitmentOpen, setIsRecruitmentOpen] = useState(false);
   const [recruitmentMode, setRecruitmentMode] = useState('teaser');
   const [isFilmOpen, setIsFilmOpen] = useState(false);
 
   // Show the short film casting call once per visit, shortly after the homepage loads
   useEffect(() => {
-    if (isAdminRoute || isPassesAdminRoute || isFreshersRoute) return undefined;
+    if (isAdminRoute || isPassesAdminRoute) return undefined;
     let seen = false;
     try {
       seen = sessionStorage.getItem(FILM_POPUP_SEEN_KEY) === '1';
@@ -41,7 +41,7 @@ function App() {
     if (seen) return undefined;
     const t = setTimeout(() => setIsFilmOpen(true), 900);
     return () => clearTimeout(t);
-  }, [isAdminRoute, isPassesAdminRoute, isFreshersRoute]);
+  }, [isAdminRoute, isPassesAdminRoute]);
 
   const closeFilmPopup = useCallback(() => {
     setIsFilmOpen(false);
@@ -55,40 +55,16 @@ function App() {
   useEffect(() => {
     const checkRoute = () => {
       const path = window.location.pathname.replace(/\/+$/, '') || '/';
-      if (path === '/admin/passes') {
-        setIsPassesAdminRoute(true);
-        setIsAdminRoute(false);
-        setIsFreshersRoute(false);
-        return;
+      if (RETIRED_PATHS.includes(path)) {
+        window.history.replaceState({}, '', '/');
       }
-      if (path === '/admin') {
-        setIsAdminRoute(true);
-        setIsPassesAdminRoute(false);
-        setIsFreshersRoute(false);
-        return;
-      }
-      if (path === '/freshers-pass' || path === '/freshers') {
-        setIsFreshersRoute(true);
-        setIsAdminRoute(false);
-        setIsPassesAdminRoute(false);
-        return;
-      }
-      setIsAdminRoute(false);
-      setIsPassesAdminRoute(false);
-      setIsFreshersRoute(false);
+      setIsPassesAdminRoute(path === '/admin/passes');
+      setIsAdminRoute(path === '/admin');
     };
 
     checkRoute();
-
-    const handlePopState = () => {
-      const path = window.location.pathname.replace(/\/+$/, '') || '/';
-      setIsPassesAdminRoute(path === '/admin/passes');
-      setIsAdminRoute(path === '/admin');
-      setIsFreshersRoute(path === '/freshers-pass' || path === '/freshers');
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('popstate', checkRoute);
+    return () => window.removeEventListener('popstate', checkRoute);
   }, []);
 
   // If on passes admin route, render PassesAdminDashboard directly
@@ -99,19 +75,6 @@ function App() {
   // If on admin route, render Admin Dashboard directly
   if (isAdminRoute) {
     return <AdminDashboard />;
-  }
-
-  // If on Freshers Party Pass route, render FreshersPass directly
-  if (isFreshersRoute) {
-    return (
-      <FreshersPass 
-        onBackToHome={() => {
-          window.history.pushState({}, '', '/');
-          setIsFreshersRoute(false);
-          setIsRecruitmentOpen(false);
-        }} 
-      />
-    );
   }
 
   const handleOpenJoinDirectly = () => {
@@ -162,37 +125,11 @@ function App() {
       <RecruitmentSection 
         isOpen={isRecruitmentOpen} 
         mode={recruitmentMode}
-        onClose={() => setIsRecruitmentOpen(false)} 
-        onNavigateToFreshers={() => {
-          setIsRecruitmentOpen(false);
-          window.history.pushState({}, '', '/freshers-pass');
-          setIsFreshersRoute(true);
-        }}
+        onClose={() => setIsRecruitmentOpen(false)}
       />
 
       {/* Short Film Crew & Cast Application Popup */}
       <ShortFilmApplication isOpen={isFilmOpen} onClose={closeFilmPopup} />
-
-      {/* Floating Freshers Party Pass Luxury CTA */}
-      <a
-        href="/freshers-pass"
-        onClick={(e) => {
-          e.preventDefault();
-          window.history.pushState({}, '', '/freshers-pass');
-          setIsFreshersRoute(true);
-        }}
-        className="fixed bottom-6 right-6 z-40 group flex items-center gap-3 px-4 py-3 bg-zinc-950/90 hover:bg-zinc-900 border border-amber-500/40 hover:border-amber-400 text-white rounded-full shadow-[0_10px_35px_rgba(0,0,0,0.8),0_0_20px_rgba(245,158,11,0.25)] backdrop-blur-xl transition-all duration-300 hover:scale-105 select-none"
-        aria-label="Book Freshers Party Pass"
-      >
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-black font-black text-sm shrink-0 shadow-[0_0_12px_rgba(245,158,11,0.6)]">
-          🎟️
-        </div>
-        <div className="flex flex-col text-left pr-1">
-          <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-amber-400 font-bold">NOV 7 • FINN CLUB</span>
-          <span className="text-xs font-black uppercase tracking-wider text-white">Freshers Pass</span>
-        </div>
-        <ArrowUpRight className="w-4 h-4 text-amber-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-      </a>
     </div>
   );
 }
