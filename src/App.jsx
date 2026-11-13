@@ -12,25 +12,36 @@ import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import ScrollReveal from './components/ScrollReveal';
 import RecruitmentSection from './components/RecruitmentSection';
-import AdminDashboard from './components/AdminDashboard';
-import PassesAdminDashboard from './components/PassesAdminDashboard';
 import ShortFilmApplication from './components/ShortFilmApplication';
+import SiteAdminDashboard from './components/SiteAdminDashboard';
+import { trackVisit } from './lib/trackVisit';
 
 const FILM_POPUP_SEEN_KEY = 'rd_film_popup_seen';
 
 // The Freshers Party Pass page has been retired; old links land on the homepage
 const RETIRED_PATHS = ['/freshers-pass', '/freshers'];
 
+// The admin dashboard, plus the old admin addresses that now lead to it
+const ADMIN_PATH = '/admin/dashboard';
+const OLD_ADMIN_PATHS = ['/admin', '/admin/passes'];
+
+const currentPath = () => window.location.pathname.replace(/\/+$/, '') || '/';
+const isAdminPath = (path) => path === ADMIN_PATH || OLD_ADMIN_PATHS.includes(path);
+
 function App() {
-  const [isAdminRoute, setIsAdminRoute] = useState(false);
-  const [isPassesAdminRoute, setIsPassesAdminRoute] = useState(false);
+  const [isSiteAdminRoute, setIsSiteAdminRoute] = useState(() => isAdminPath(currentPath()));
   const [isRecruitmentOpen, setIsRecruitmentOpen] = useState(false);
   const [recruitmentMode, setRecruitmentMode] = useState('teaser');
   const [isFilmOpen, setIsFilmOpen] = useState(false);
 
+  // Count this visit for the admin dashboard (skipped on admin pages)
+  useEffect(() => {
+    trackVisit();
+  }, []);
+
   // Show the short film casting call once per visit, shortly after the homepage loads
   useEffect(() => {
-    if (isAdminRoute || isPassesAdminRoute) return undefined;
+    if (isSiteAdminRoute) return undefined;
     let seen = false;
     try {
       seen = sessionStorage.getItem(FILM_POPUP_SEEN_KEY) === '1';
@@ -40,7 +51,7 @@ function App() {
     if (seen) return undefined;
     const t = setTimeout(() => setIsFilmOpen(true), 900);
     return () => clearTimeout(t);
-  }, [isAdminRoute, isPassesAdminRoute]);
+  }, [isSiteAdminRoute]);
 
   const closeFilmPopup = useCallback(() => {
     setIsFilmOpen(false);
@@ -53,12 +64,14 @@ function App() {
 
   useEffect(() => {
     const checkRoute = () => {
-      const path = window.location.pathname.replace(/\/+$/, '') || '/';
+      const path = currentPath();
       if (RETIRED_PATHS.includes(path)) {
         window.history.replaceState({}, '', '/');
       }
-      setIsPassesAdminRoute(path === '/admin/passes');
-      setIsAdminRoute(path === '/admin');
+      if (OLD_ADMIN_PATHS.includes(path)) {
+        window.history.replaceState({}, '', ADMIN_PATH);
+      }
+      setIsSiteAdminRoute(isAdminPath(path));
     };
 
     checkRoute();
@@ -66,14 +79,9 @@ function App() {
     return () => window.removeEventListener('popstate', checkRoute);
   }, []);
 
-  // If on passes admin route, render PassesAdminDashboard directly
-  if (isPassesAdminRoute) {
-    return <PassesAdminDashboard />;
-  }
-
-  // If on admin route, render Admin Dashboard directly
-  if (isAdminRoute) {
-    return <AdminDashboard />;
+  // Admin: visitors + short film applications
+  if (isSiteAdminRoute) {
+    return <SiteAdminDashboard />;
   }
 
   const handleOpenJoinDirectly = () => {

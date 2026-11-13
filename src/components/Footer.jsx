@@ -123,11 +123,7 @@ export default function Footer() {
           </p>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 text-xs">
             <a
-              href="/admin"
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.href = '/admin';
-              }}
+              href="/admin/dashboard"
               className="text-zinc-600 hover:text-rd-red transition-colors tracking-[0.2em] uppercase font-mono text-[11px] flex items-center gap-1.5"
             >
               <Lock className="w-3 h-3" />
