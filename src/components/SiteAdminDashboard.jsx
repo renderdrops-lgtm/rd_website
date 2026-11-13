@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { RefreshCw, LogOut, Download, Search, ChevronLeft, ChevronRight, ChevronDown, Lock } from 'lucide-react';
+import { RefreshCw, LogOut, Download, Search, ChevronLeft, ChevronRight, ChevronDown, Lock, Eye, EyeOff } from 'lucide-react';
 import { Tile, Panel, Breakdown, downloadCsv, fmt, fmtDateTime, fmtDateTimeFull, phoneForCsv } from './adminUi';
 import { RecruitmentTab, TicketsTab } from './AdminRecordsTab';
 
@@ -122,6 +122,7 @@ const FILM_CSV_COLUMNS = [
 
 function Login({ onLogin, error, busy }) {
   const [pw, setPw] = useState('');
+  const [showPw, setShowPw] = useState(false);
   return (
     <div className="flex min-h-screen items-center justify-center bg-rd-black px-4 text-white">
       <form
@@ -134,17 +135,33 @@ function Login({ onLogin, error, busy }) {
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-rd-red">RenderDrops</p>
         <h1 className="mt-2 font-display text-4xl uppercase leading-none">Admin</h1>
         <p className="mt-3 text-sm text-zinc-400">Website visitors, short film and Join Us applications, and Freshers tickets.</p>
-        <label className="mt-6 block">
-          <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-zinc-500">Password</span>
+        <label htmlFor="admin-password" className="mt-6 block text-[11px] font-bold uppercase tracking-[0.1em] text-zinc-500">
+          Password
+        </label>
+        <div className="relative mt-1.5">
           <input
-            type="password"
+            id="admin-password"
+            type={showPw ? 'text' : 'password'}
             autoFocus
             autoComplete="current-password"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             value={pw}
             onChange={(e) => setPw(e.target.value)}
-            className="mt-1.5 block w-full border border-zinc-700 bg-zinc-950 px-3.5 py-3 text-white focus:border-rd-red focus:outline-none"
+            className="block w-full border border-zinc-700 bg-zinc-950 py-3 pl-3.5 pr-12 text-white focus:border-rd-red focus:outline-none"
           />
-        </label>
+          <button
+            type="button"
+            onClick={() => setShowPw((v) => !v)}
+            aria-label={showPw ? 'Hide password' : 'Show password'}
+            aria-pressed={showPw}
+            title={showPw ? 'Hide password' : 'Show password'}
+            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-zinc-500 hover:text-white"
+          >
+            {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
         {error && <p className="mt-3 text-sm font-semibold text-rd-red">{error}</p>}
         <button
           type="submit"
