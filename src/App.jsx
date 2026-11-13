@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import MarqueeBanner from './components/MarqueeBanner';
@@ -16,6 +16,9 @@ import RecruitmentSection from './components/RecruitmentSection';
 import AdminDashboard from './components/AdminDashboard';
 import PassesAdminDashboard from './components/PassesAdminDashboard';
 import FreshersPass from './components/FreshersPass';
+import ShortFilmApplication from './components/ShortFilmApplication';
+
+const FILM_POPUP_SEEN_KEY = 'rd_film_popup_seen';
 import { ArrowUpRight } from 'lucide-react';
 
 function App() {
@@ -24,6 +27,30 @@ function App() {
   const [isFreshersRoute, setIsFreshersRoute] = useState(false);
   const [isRecruitmentOpen, setIsRecruitmentOpen] = useState(false);
   const [recruitmentMode, setRecruitmentMode] = useState('teaser');
+  const [isFilmOpen, setIsFilmOpen] = useState(false);
+
+  // Show the short film casting call once per visit, shortly after the homepage loads
+  useEffect(() => {
+    if (isAdminRoute || isPassesAdminRoute || isFreshersRoute) return undefined;
+    let seen = false;
+    try {
+      seen = sessionStorage.getItem(FILM_POPUP_SEEN_KEY) === '1';
+    } catch {
+      /* storage unavailable */
+    }
+    if (seen) return undefined;
+    const t = setTimeout(() => setIsFilmOpen(true), 900);
+    return () => clearTimeout(t);
+  }, [isAdminRoute, isPassesAdminRoute, isFreshersRoute]);
+
+  const closeFilmPopup = useCallback(() => {
+    setIsFilmOpen(false);
+    try {
+      sessionStorage.setItem(FILM_POPUP_SEEN_KEY, '1');
+    } catch {
+      /* storage unavailable */
+    }
+  }, []);
 
   useEffect(() => {
     const checkRoute = () => {
@@ -142,6 +169,9 @@ function App() {
           setIsFreshersRoute(true);
         }}
       />
+
+      {/* Short Film Crew & Cast Application Popup */}
+      <ShortFilmApplication isOpen={isFilmOpen} onClose={closeFilmPopup} />
 
       {/* Floating Freshers Party Pass Luxury CTA */}
       <a
