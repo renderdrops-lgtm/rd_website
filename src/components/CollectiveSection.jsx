@@ -23,7 +23,7 @@ const collectiveMembers = [
     image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-22%20at%202.27.10%20PM.jpeg"
   },
   {
-    name: "Yogesh Sharanavasappa Koti",
+    name: "Yogesh Sharanabasappa Koti",
     role: "Co-Director Business & Client Division",
     image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-21%20at%2011.19.00%20PM.jpeg"
   },

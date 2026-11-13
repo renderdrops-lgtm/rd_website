@@ -230,7 +230,7 @@ export const collectiveMembers = [
     experience: "",
   },
   {
-    name: "Yogesh Koti",
+    name: "Yogesh Sharanabasappa Koti",
     role: "Buisness & Client",
     speciality: "",
     image: "",
