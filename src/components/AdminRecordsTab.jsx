@@ -308,7 +308,6 @@ const tix = {
   amount: (r) => Number(r.amount_paid ?? r.amount) || 0,
   discount: (r) => Number(r.discount_applied ?? r.discount_amount ?? r.promo_discount) || 0,
   promo: (r) => r.promo_code_used || r.promo_code,
-  payment: (r) => r.razorpay_payment_id || r.payment_id,
   members: (r) => {
     const m = r.group_members;
     if (Array.isArray(m)) {
@@ -327,7 +326,6 @@ const TICKET_DETAILS = [
   ['Amount paid', (r) => fmtMoney(tix.amount(r))],
   ['Discount', (r) => (tix.discount(r) ? fmtMoney(tix.discount(r)) : '')],
   ['Promo code', tix.promo],
-  ['Razorpay payment ID', tix.payment],
   ['Status', (r) => r.status],
   ['Event', (r) => [r.event_date, r.venue].filter(Boolean).join(' · ')],
 ];
@@ -394,7 +392,6 @@ export function TicketsTab({ rows: rawRows, loading, error }) {
               ['Discount (₹)', tix.discount],
               ['Promo code', tix.promo],
               ['Group members', (r) => tix.members(r).join(' | ')],
-              ['Razorpay payment ID', tix.payment],
             ],
           }}
         />

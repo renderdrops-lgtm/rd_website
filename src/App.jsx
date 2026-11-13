@@ -31,7 +31,6 @@ const isAdminPath = (path) => path === ADMIN_PATH || OLD_ADMIN_PATHS.includes(pa
 function App() {
   const [isSiteAdminRoute, setIsSiteAdminRoute] = useState(() => isAdminPath(currentPath()));
   const [isRecruitmentOpen, setIsRecruitmentOpen] = useState(false);
-  const [recruitmentMode, setRecruitmentMode] = useState('teaser');
   const [isFilmOpen, setIsFilmOpen] = useState(false);
 
   // Count this visit for the admin dashboard (skipped on admin pages)
@@ -85,7 +84,6 @@ function App() {
   }
 
   const handleOpenJoinDirectly = () => {
-    setRecruitmentMode('form');
     setIsRecruitmentOpen(true);
   };
 
@@ -129,7 +127,6 @@ function App() {
       {/* Recruitment Popup Modal */}
       <RecruitmentSection 
         isOpen={isRecruitmentOpen} 
-        mode={recruitmentMode}
         onClose={() => setIsRecruitmentOpen(false)}
       />
 
