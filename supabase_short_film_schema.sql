@@ -6,6 +6,7 @@
 CREATE TABLE IF NOT EXISTS public.short_film_applications (
   id BIGSERIAL PRIMARY KEY,
   full_name TEXT NOT NULL,
+  srn TEXT,
   contact TEXT NOT NULL,
   branch TEXT NOT NULL,
   roles TEXT[] NOT NULL DEFAULT '{}',
@@ -20,6 +21,7 @@ CREATE TABLE IF NOT EXISTS public.short_film_applications (
 
 -- Safe to re-run: adds columns introduced after the table was first created
 ALTER TABLE public.short_film_applications ADD COLUMN IF NOT EXISTS languages TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE public.short_film_applications ADD COLUMN IF NOT EXISTS srn TEXT;
 
 ALTER TABLE public.short_film_applications ENABLE ROW LEVEL SECURITY;
 

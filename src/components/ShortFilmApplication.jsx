@@ -9,6 +9,7 @@ const LANGUAGES = ['Tamil', 'Telugu', 'Kannada', 'English', 'Hindi', 'Malayalam'
 
 const EMPTY_FORM = {
   fullName: '',
+  srn: '',
   contact: '',
   branch: '',
   roles: [],
@@ -39,9 +40,9 @@ async function emailApplication(row) {
       _subject: `Short film application: ${row.full_name} (${row.roles.join(', ')})`,
       _template: 'table',
       _captcha: 'false',
-      ...(row.contact.includes('@') ? { _replyto: row.contact } : {}),
       Name: row.full_name,
-      'Email / WhatsApp': row.contact,
+      SRN: row.srn,
+      'WhatsApp number': row.contact,
       Branch: row.branch,
       'Applying for': row.roles.join(', '),
       Languages: row.languages.join(', '),
@@ -58,10 +59,21 @@ async function emailApplication(row) {
   }
 }
 
+// Accepts "98765 43210", "+91 98765-43210", "09876543210" etc.
+// Returns "+91XXXXXXXXXX", or null if it isn't a valid Indian mobile number.
+function normalizeWhatsApp(value) {
+  let digits = value.replace(/\D/g, '');
+  if (digits.length === 12 && digits.startsWith('91')) digits = digits.slice(2);
+  if (digits.length === 11 && digits.startsWith('0')) digits = digits.slice(1);
+  return /^[6-9]\d{9}$/.test(digits) ? `+91${digits}` : null;
+}
+
 function validate(form) {
   const e = {};
   if (!form.fullName.trim()) e.fullName = 'Add your name';
-  if (!form.contact.trim()) e.contact = 'We need some way to reach you';
+  if (!form.srn.trim()) e.srn = 'Add your SRN';
+  if (!form.contact.trim()) e.contact = 'Add your WhatsApp number';
+  else if (!normalizeWhatsApp(form.contact)) e.contact = 'Enter a valid 10-digit WhatsApp number';
   if (!form.branch.trim()) e.branch = 'Add your branch';
   if (!form.roles.length) e.roles = 'Pick at least one role';
   if (!form.languages.length) e.languages = 'Pick at least one language';
@@ -228,7 +240,8 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
     setStatus('sending');
     const row = {
       full_name: form.fullName.trim(),
-      contact: form.contact.trim(),
+      srn: form.srn.trim().replace(/\s+/g, ''),
+      contact: normalizeWhatsApp(form.contact),
       branch: form.branch.trim(),
       roles: form.roles,
       languages: form.languages,
@@ -376,17 +389,29 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
               <form onSubmit={handleSubmit} noValidate>
                 <Section num="—" title="Basic details">
                   <div className="grid gap-5 sm:grid-cols-2">
-                    <div className="sm:col-span-2">
-                      <LineInput
-                        label="Full name"
-                        value={form.fullName}
-                        onChange={(e) => set('fullName', e.target.value)}
-                        autoComplete="name"
-                        error={errors.fullName}
-                      />
-                    </div>
                     <LineInput
-                      label="Email / WhatsApp number"
+                      label="Full name"
+                      value={form.fullName}
+                      onChange={(e) => set('fullName', e.target.value)}
+                      autoComplete="name"
+                      error={errors.fullName}
+                    />
+                    <LineInput
+                      label="SRN"
+                      value={form.srn}
+                      onChange={(e) => set('srn', e.target.value.toUpperCase())}
+                      placeholder="Your SRN"
+                      autoComplete="off"
+                      autoCapitalize="characters"
+                      spellCheck={false}
+                      error={errors.srn}
+                    />
+                    <LineInput
+                      label="WhatsApp number"
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      placeholder="98765 43210"
                       value={form.contact}
                       onChange={(e) => set('contact', e.target.value)}
                       error={errors.contact}
