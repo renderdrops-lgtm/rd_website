@@ -26,6 +26,38 @@ const CLAPPER_STRIPES = {
     'repeating-linear-gradient(-55deg, #141414 0 22px, #F4F1EC 22px 44px)',
 };
 
+// Applications are emailed through FormSubmit (formsubmit.co), which needs no
+// server or API key. The very first submission sends an "Activate form" email to
+// this inbox; nothing is delivered until someone clicks that link once.
+const APPLICATION_INBOX = 'renderdrops@gmail.com';
+
+async function emailApplication(row) {
+  const res = await fetch(`https://formsubmit.co/ajax/${APPLICATION_INBOX}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      _subject: `Short film application: ${row.full_name} (${row.roles.join(', ')})`,
+      _template: 'table',
+      _captcha: 'false',
+      ...(row.contact.includes('@') ? { _replyto: row.contact } : {}),
+      Name: row.full_name,
+      'Email / WhatsApp': row.contact,
+      Branch: row.branch,
+      'Applying for': row.roles.join(', '),
+      Languages: row.languages.join(', '),
+      Experience: row.experience,
+      'Work link': row.work_link || '-',
+      'Why they want to join': row.why_join || '-',
+      Availability: row.availability,
+      'Can travel to locations': row.can_travel ? 'Yes' : 'No',
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || String(data.success) !== 'true') {
+    throw new Error(data.message || `Email service returned ${res.status}`);
+  }
+}
+
 function validate(form) {
   const e = {};
   if (!form.fullName.trim()) e.fullName = 'Add your name';
@@ -135,7 +167,7 @@ function ChoiceRow({ label, children, error }) {
 export default function ShortFilmApplication({ isOpen, onClose }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState('idle'); // idle | sending | done
+  const [status, setStatus] = useState('idle'); // idle | sending | done | error
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -167,8 +199,17 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
   };
 
   const toggle = (field, value) => {
-    const list = form[field];
-    set(field, list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+    setForm((f) => {
+      const list = f[field];
+      return { ...f, [field]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value] };
+    });
+    if (errors[field]) {
+      setErrors((e) => {
+        const next = { ...e };
+        delete next[field];
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -199,17 +240,27 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
       submitted_at: new Date().toISOString(),
     };
 
-    try {
-      const { error } = await supabase.from('short_film_applications').insert([row]);
-      if (error) throw error;
-    } catch (err) {
-      console.error('Supabase error, keeping a local copy:', err.message);
-      try {
-        const saved = JSON.parse(localStorage.getItem('rd_short_film_apps') || '[]');
-        localStorage.setItem('rd_short_film_apps', JSON.stringify([row, ...saved]));
-      } catch {
-        /* storage unavailable */
-      }
+    const [emailResult, dbResult] = await Promise.allSettled([
+      emailApplication(row),
+      supabase
+        .from('short_film_applications')
+        .insert([row])
+        .then(({ error }) => {
+          if (error) throw error;
+        }),
+    ]);
+
+    if (emailResult.status === 'rejected') {
+      console.error('Application email failed:', emailResult.reason?.message);
+    }
+    if (dbResult.status === 'rejected') {
+      console.error('Saving application to Supabase failed:', dbResult.reason?.message);
+    }
+
+    // As long as one copy reached us, the applicant is done
+    if (emailResult.status === 'rejected' && dbResult.status === 'rejected') {
+      setStatus('error');
+      return;
     }
 
     setStatus('done');
@@ -435,6 +486,12 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
                     </ChoiceRow>
                   </div>
                 </Section>
+
+                {status === 'error' && (
+                  <p role="alert" className="mb-4 border-l-[3px] border-rd-red bg-rd-red/10 px-4 py-3 text-sm font-semibold text-rd-dark-text">
+                    Your application didn't go through. Check your internet connection and try again.
+                  </p>
+                )}
 
                 <div className="flex flex-col-reverse gap-4 border-t-[1.5px] border-rd-dark-text pt-6 sm:flex-row sm:items-center sm:justify-between">
                   <button
