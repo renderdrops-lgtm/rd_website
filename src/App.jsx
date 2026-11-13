@@ -49,10 +49,6 @@ function App() {
       setIsAdminRoute(false);
       setIsPassesAdminRoute(false);
       setIsFreshersRoute(false);
-
-      // Otherwise show recruitment teaser popup on home page load
-      setRecruitmentMode('teaser');
-      setIsRecruitmentOpen(true);
     };
 
     checkRoute();
