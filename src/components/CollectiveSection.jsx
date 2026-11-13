@@ -38,7 +38,7 @@ const collectiveMembers = [
     image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-22%20at%2011.52.11%20PM.jpeg"
   },
   {
-    name: "Srujan Umachangi",
+    name: "Srujan Umachagi",
     role: "Core Creative & Media Division",
     image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-23%20at%208.25.48%20AM.jpeg"
   },
