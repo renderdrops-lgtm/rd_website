@@ -1,26 +1,26 @@
 import React from 'react';
 
-// Collective members data with direct Supabase image placeholders and safe fallbacks for blanks
+// Collective members. Photos live in public/media (compressed WebP); blank image shows a fallback
 const collectiveMembers = [
   {
     name: "Sanskrithi M",
     role: "Founder & Chief Executive Officer",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/san%20(1).jpeg"
+    image: "/media/team-sanskrithi-m.webp"
   },
   {
     name: "Ravi Kumar N",
     role: "Chief Operating Officer",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-22%20at%202.27.55%20PM.jpeg"
+    image: "/media/team-ravi-kumar-n.webp"
   },
   {
     name: "Sinchana P",
     role: "Director - Business & Client Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-22%20at%2012.48.17%20PM%20(1).jpeg"
+    image: "/media/team-sinchana-p.webp"
   },
   {
     name: "Tejas B S",
     role: "Director - Brand & Communication Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-22%20at%202.27.10%20PM.jpeg"
+    image: "/media/team-tejas-b-s.webp"
   },
   {
     name: "Yogesh Sharanabasappa Koti",
@@ -30,57 +30,57 @@ const collectiveMembers = [
   {
     name: "Adith Aby Raj",
     role: "Co-Director Creative & Media Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-21%20at%2010.50.10%20PM.jpeg"
+    image: "/media/team-adith-aby-raj.webp"
   },
   {
     name: "Danush GG",
     role: "Director Creative & Media Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-22%20at%2011.52.11%20PM.jpeg"
+    image: "/media/team-danush-gg.webp"
   },
   {
     name: "Srujan Umachagi",
     role: "Core Creative & Media Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-23%20at%208.25.48%20AM.jpeg"
+    image: "/media/team-srujan-umachagi.webp"
   },
   {
     name: "Ankith Raj K S",
     role: "Core Creative & Media Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/ankith.webp"
+    image: "/media/team-ankith-raj-k-s.webp"
   },
   {
     name: "Anush Kiran K S",
     role: "Core Brand & Communication Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-22%20at%2010.44.02%20PM.jpeg"
+    image: "/media/team-anush-kiran-k-s.webp"
   },
   {
     name: "Preetham M",
     role: "Creative & Media Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/IMG_3743.JPG%20(1).jpeg"
+    image: "/media/team-preetham-m.webp"
   },
   {
     name: "Shekar T",
     role: "Production & Operations Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/shekar.webp"
+    image: "/media/team-shekar-t.webp"
   },
   {
     name: "Rajat N Gouda",
     role: "Creative & Media Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-22%20at%203.32.13%20PM.jpeg"
+    image: "/media/team-rajat-n-gouda.webp"
   },
   {
     name: "Amoghavarsha H A",
     role: "Creative & Media Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/WhatsApp%20Image%202026-09-22%20at%2010.12.51%20PM.jpeg"
+    image: "/media/team-amoghavarsha-h-a.webp"
   },
   {
     name: "Aditya Naravi",
     role: "Creative & Media Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/aditya%20(1).webp"
+    image: "/media/team-aditya-naravi.webp"
   },
   {
     name: "Vivek",
     role: "Creative & Media Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/vivek.webp"
+    image: "/media/team-vivek.webp"
   },
   {
     name: "Yashas",
@@ -95,7 +95,7 @@ const collectiveMembers = [
   {
     name: "Prajwal Sagar",
     role: "Brand & Communication Division",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rdddd/prajwal.webp"
+    image: "/media/team-prajwal-sagar.webp"
   },
   {
     name: "Tejaswini",

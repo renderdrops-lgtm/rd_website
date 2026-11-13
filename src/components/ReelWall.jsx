@@ -7,19 +7,19 @@ const reelFrames = [
     code: "RF-01",
     category: "VFX / VIDEO",
     title: "Cinematic Motion Frame 1",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/4a373b2e-bad2-4786-9625-fa31414a5bab.png"
+    image: "/media/reel-cinematic-motion-frame-1.webp"
   },
   {
     code: "RF-02",
     category: "DESIGN",
     title: "Cinematic Motion Frame 2",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/ChatGPT%20Image%20Sep%2022,%202026,%2012_31_31%20PM.png"
+    image: "/media/reel-cinematic-motion-frame-2.webp"
   },
   {
     code: "RF-03",
     category: "PHOTOGRAPHY",
     title: "Cinematic Motion Frame 3",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/IMG_1077%20(1).PNG"
+    image: "/media/reel-cinematic-motion-frame-3.webp"
   }
 ];
 

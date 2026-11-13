@@ -11,7 +11,7 @@ const portfolioProjects = [
     year: "2026",
     stats: "10,000+ Attendees • 48H Turnaround",
     tagline: "High-octane festival recap with 48h turnaround",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/IMG_1074.PNG"
+    image: "/media/work-aurafesta-2-0-aftermovie.webp"
   },
   {
     id: 2,
@@ -20,7 +20,7 @@ const portfolioProjects = [
     year: "2026",
     stats: "15K+ Impressions",
     tagline: "Complete visual system and graphics",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/IMG_0218.PNG"
+    image: "/media/work-flashmob-identity.webp"
   },
   {
     id: 3,
@@ -29,7 +29,7 @@ const portfolioProjects = [
     year: "2026",
     stats: "4 Brand Deals • 1.5 Lakh+ Value",
     tagline: "High-conversion brand partnership deck & media activation",
-    image: "https://drslbdiwzpfsgzmishhq.supabase.co/storage/v1/object/public/rd_media/ChatGPT%20Image%20Sep%2022,%202026,%2012_03_00%20PM.png"
+    image: "/media/work-sponsor-pulse.webp"
   }
 ];
 
