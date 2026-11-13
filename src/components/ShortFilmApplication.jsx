@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X, ArrowRight } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 const ROLES = ['Actor / Actress', 'Director / Assistant Director', 'Spot Corrector'];
 const AVAILABILITY = ['Weekdays', 'Weekends', 'Both'];
@@ -27,35 +26,17 @@ const CLAPPER_STRIPES = {
     'repeating-linear-gradient(-55deg, #141414 0 22px, #F4F1EC 22px 44px)',
 };
 
-// Applications are emailed through FormSubmit (formsubmit.co), which needs no
-// server or API key. The very first submission sends an "Activate form" email to
-// this inbox; nothing is delivered until someone clicks that link once.
-const APPLICATION_INBOX = 'renderdrops@gmail.com';
-
-async function emailApplication(row) {
-  const res = await fetch(`https://formsubmit.co/ajax/${APPLICATION_INBOX}`, {
+// The server (api/send-application.js) turns the application into a PDF and
+// emails it to the RenderDrops inbox. Nothing is stored anywhere else.
+async function sendApplication(application) {
+  const res = await fetch('/api/send-application', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({
-      _subject: `Short film application: ${row.full_name} (${row.roles.join(', ')})`,
-      _template: 'table',
-      _captcha: 'false',
-      Name: row.full_name,
-      SRN: row.srn,
-      'WhatsApp number': row.contact,
-      Branch: row.branch,
-      'Applying for': row.roles.join(', '),
-      Languages: row.languages.join(', '),
-      Experience: row.experience,
-      'Work link': row.work_link || '-',
-      'Why they want to join': row.why_join || '-',
-      Availability: row.availability,
-      'Can travel to locations': row.can_travel ? 'Yes' : 'No',
-    }),
+    body: JSON.stringify(application),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok || String(data.success) !== 'true') {
-    throw new Error(data.message || `Email service returned ${res.status}`);
+  if (!res.ok || !data.success) {
+    throw new Error(data.error || `Server returned ${res.status}`);
   }
 }
 
@@ -181,6 +162,7 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('idle'); // idle | sending | done | error
   const scrollRef = useRef(null);
+  const honeypotRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -238,40 +220,23 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
     }
 
     setStatus('sending');
-    const row = {
-      full_name: form.fullName.trim(),
-      srn: form.srn.trim().replace(/\s+/g, ''),
-      contact: normalizeWhatsApp(form.contact),
-      branch: form.branch.trim(),
-      roles: form.roles,
-      languages: form.languages,
-      experience: form.experience.trim(),
-      work_link: form.workLink.trim() || null,
-      why_join: form.whyJoin.trim() || null,
-      availability: form.availability,
-      can_travel: form.canTravel === 'Yes',
-      submitted_at: new Date().toISOString(),
-    };
-
-    const [emailResult, dbResult] = await Promise.allSettled([
-      emailApplication(row),
-      supabase
-        .from('short_film_applications')
-        .insert([row])
-        .then(({ error }) => {
-          if (error) throw error;
-        }),
-    ]);
-
-    if (emailResult.status === 'rejected') {
-      console.error('Application email failed:', emailResult.reason?.message);
-    }
-    if (dbResult.status === 'rejected') {
-      console.error('Saving application to Supabase failed:', dbResult.reason?.message);
-    }
-
-    // As long as one copy reached us, the applicant is done
-    if (emailResult.status === 'rejected' && dbResult.status === 'rejected') {
+    try {
+      await sendApplication({
+        fullName: form.fullName.trim(),
+        srn: form.srn.trim().replace(/\s+/g, ''),
+        whatsapp: normalizeWhatsApp(form.contact),
+        branch: form.branch.trim(),
+        roles: form.roles,
+        languages: form.languages,
+        experience: form.experience.trim(),
+        workLink: form.workLink.trim(),
+        whyJoin: form.whyJoin.trim(),
+        availability: form.availability,
+        canTravel: form.canTravel,
+        website: honeypotRef.current?.value || '',
+      });
+    } catch (err) {
+      console.error('Sending application failed:', err.message);
       setStatus('error');
       return;
     }
@@ -387,6 +352,16 @@ export default function ShortFilmApplication({ isOpen, onClose }) {
               </div>
 
               <form onSubmit={handleSubmit} noValidate>
+                {/* Spam trap: hidden from people, bots tend to fill it in */}
+                <input
+                  ref={honeypotRef}
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="absolute -left-[9999px] h-px w-px opacity-0"
+                />
                 <Section num="—" title="Basic details">
                   <div className="grid gap-5 sm:grid-cols-2">
                     <LineInput
