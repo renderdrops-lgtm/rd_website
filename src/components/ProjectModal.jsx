@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ArrowUpRight, CheckCircle2, Sparkles } from 'lucide-react';
+import { X, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 
 export default function ProjectModal({ project, onClose }) {
   if (!project) return null;

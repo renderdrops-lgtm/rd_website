@@ -25,7 +25,7 @@ const collectiveMembers = [
   {
     name: "Yogesh Sharanabasappa Koti",
     role: "Co-Director Business & Client Division",
-    image: "/team/yogesh-koti.webp"
+    image: "/media/team-yogesh-sharanabasappa-koti.webp"
   },
   {
     name: "Adith Aby Raj",

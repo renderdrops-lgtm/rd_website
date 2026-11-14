@@ -1,5 +1,5 @@
 import React from 'react';
-import { highlightsData, brandPartners } from '../data/studioData';
+import { highlightsData } from '../data/studioData';
 import { Star, Building2 } from 'lucide-react';
 
 export default function HighlightsSection() {
